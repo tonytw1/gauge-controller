@@ -1,0 +1,47 @@
+<h4>Gauges</h4>
+<hr/>
+Gauges detected: $gauges.size()
+<br/>
+Metrics available: $availableMetrics.size()
+<hr/>
+<table>
+	#foreach ($gauge in $gauges) 
+		<form action="/" method="POST">
+		<tr>
+			<td>
+				$gauge.name
+				<br/>
+				<input name="gauge" type="hidden" value="$gauge.name"/>
+			</td>
+			<td>
+				<select name="metric">
+					<option value=""></option>
+					#foreach($metric in $availableMetrics) 
+						<option value="$metric.name" #if ($metric.name == $gaugeRoutes.get($gauge.name).metricName) SELECTED #end>$metric.name 
+							#if ($metric.lastValue) ($metric.lastValue) #end
+						</option>											
+					#end
+				</select>
+								
+				#if ($gauge.type == 'INDICATOR') 
+					<select name="scale">
+						<option value="-1" #if (-1 == $gaugeRoutes.get($gauge.name).scale) SELECTED #end>-1</option>
+						<option value="1" #if (1 == $gaugeRoutes.get($gauge.name).scale) SELECTED #end>1</option>
+					</select>	
+				#else				
+					x 
+					<select name="scale">
+						<option value="0.01" #if (0.01 == $gaugeRoutes.get($gauge.name).scale) SELECTED #end >0.01</option>							
+						<option value="0.1" #if (0.1 == $gaugeRoutes.get($gauge.name).scale) SELECTED #end >0.1</option>
+						<option value="1" #if (1 == $gaugeRoutes.get($gauge.name).scale) SELECTED #end>1</option>
+						<option value="10" #if (10 == $gaugeRoutes.get($gauge.name).scale) SELECTED #end>10</option>							
+						<option value="100" #if (100 == $gaugeRoutes.get($gauge.name).scale) SELECTED #end>100</option>
+					</select>	
+				#end								
+				<input type="submit" value="set"/>				
+			</td>
+		</tr>
+		</form>
+	#end
+</table>
+<hr/>
