@@ -1,6 +1,7 @@
 package uk.co.eelpieconsulting.monitoring.controllers;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -16,6 +17,7 @@ import uk.co.eelpieconsulting.monitoring.model.Metric;
 
 import com.google.common.base.Strings;
 
+@EnableAutoConfiguration
 @Controller
 public class HomepageController {
 
@@ -34,10 +36,11 @@ public class HomepageController {
 	
 	@RequestMapping(value="/", method=RequestMethod.GET)
 	public ModelAndView homepage() {
-		return new ModelAndView("homepage").
+		ModelAndView mv = new ModelAndView("homepage").
 			addObject("gauges", gaugeDAO.getGauges()).
 			addObject("availableMetrics", metricsDAO.getMetrics()).
 			addObject("gaugeRoutes", routingDAO.getGaugeRoutes());
+		return mv;
 	}
 	
 	@RequestMapping(value="/", method=RequestMethod.POST)

@@ -23,7 +23,7 @@ public class MetricPublisher {
 
 	@Autowired
 	public MetricPublisher(MqttConnectionFactory mqttConnectionFactory,
-			@Value(value = "#{config['mqtt.gauges.topic']}") String gaugesTopic) throws URISyntaxException, Exception {
+			@Value(value = "${mqtt.gauges.topic}") String gaugesTopic) throws URISyntaxException, Exception {
 		this.connection = mqttConnectionFactory.connectToGaugesHost();	
 
 		this.gaugesTopic = gaugesTopic;

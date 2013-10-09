@@ -1,5 +1,6 @@
 package uk.co.eelpieconsulting.monitoring;
 
+import org.apache.log4j.Logger;
 import org.fusesource.mqtt.client.BlockingConnection;
 import org.fusesource.mqtt.client.Message;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,6 +11,8 @@ import uk.co.eelpieconsulting.monitoring.model.GaugeType;
 
 @Component
 public class GaugesListener {
+	
+	private final static Logger log = Logger.getLogger(GaugesListener.class);
 	
 	private static final String GAUGE_PREFIX = "gauge:";
 	
@@ -44,8 +47,9 @@ public class GaugesListener {
 		        	}		        	
 		        	message.ack();		        	
 		        }
+		        
 			} catch (Exception e) {
-				e.printStackTrace();
+				log.error(e);
 			}
 		}
 

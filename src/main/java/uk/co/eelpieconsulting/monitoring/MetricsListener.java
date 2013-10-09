@@ -21,7 +21,8 @@ public class MetricsListener {
 	public MetricsListener(MqttConnectionFactory mqttConnectionFactory, 
 			MetricsDAO metricsDAO,
 			RoutingDAO routingDAO,
-			MetricPublisher metricPublisher) throws Exception {	   
+			MetricPublisher metricPublisher) throws Exception {
+		
 		this.mqttConnectionFactory = mqttConnectionFactory;
 		new Thread(new Listener(metricsDAO, routingDAO, metricPublisher)).start();
 	}
@@ -48,7 +49,7 @@ public class MetricsListener {
 		        }
 		        
 			} catch (Exception e) {
-				e.printStackTrace();
+				log.error(e);
 			}
 		}
 
@@ -59,7 +60,6 @@ public class MetricsListener {
 	        			        	
 	        	String metricMessage = new String(payload, "UTF-8");
 	        	log.debug("Got metric message: " + metricMessage);
-	        	
 	        	String[] fields = metricMessage.split(":");
 	        	String lastValue = fields[1];
 	        	MetricType type = lastValue.equals("true") || lastValue.equals("false") ? MetricType.BOOLEAN : MetricType.NUMBER;
@@ -76,8 +76,8 @@ public class MetricsListener {
 				message.ack();
 				
 			} catch (Exception e) {
-				e.printStackTrace();
-			}			
+				log.error(e);
+			}
 		}
 		
 	}

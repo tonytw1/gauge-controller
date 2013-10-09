@@ -23,10 +23,10 @@ public class MqttConnectionFactory {
 
 	@Autowired
 	public MqttConnectionFactory(
-			@Value(value = "#{config['mqtt.metrics.host']}") String metricsHost,
-			@Value(value = "#{config['mqtt.metrics.topic']}") String metricsTopic,
-			@Value(value = "#{config['mqtt.gauges.host']}") String gaugesHost,
-			@Value(value = "#{config['mqtt.gauges.topic']}") String gaugesTopic) {
+			@Value("${mqtt.metrics.host}") String metricsHost,
+			@Value("${mqtt.metrics.topic}") String metricsTopic,
+			@Value("${mqtt.gauges.host}") String gaugesHost,
+			@Value("${mqtt.gauges.topic}") String gaugesTopic) {
 		this.metricsHost = metricsHost;
 		this.metricsTopic = metricsTopic;
 		this.gaugesHost = gaugesHost;
