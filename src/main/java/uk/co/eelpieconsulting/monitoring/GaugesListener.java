@@ -41,11 +41,11 @@ public class GaugesListener {
 		        	final Message message = connection.receive();
 		        	byte[] payload = message.getPayload();
 		        	String messageString = new String(payload, "UTF-8");
+		        	log.debug("Got gauges message: " + messageString);		        	
 		        	if (messageString.startsWith(GAUGE_PREFIX)) {
 		        		String gaugeDescripition = messageString.split(GAUGE_PREFIX)[1];
 						gaugeDAO.registerGauge(parseGaugeDescription(gaugeDescripition));
-		        	}		        	
-		        	message.ack();		        	
+		        	}
 		        }
 		        
 			} catch (Exception e) {

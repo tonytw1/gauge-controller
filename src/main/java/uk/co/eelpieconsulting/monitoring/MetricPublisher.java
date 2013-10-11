@@ -32,7 +32,7 @@ public class MetricPublisher {
 	public void publishOntoGaugesChannel(String gauge, Metric metric, double scale) throws Exception {
 		log.debug("Publishing routed metric: " + metric + " to gauge: " + gauge + " scaled by: " + scale);			
 		final String metricMessage = gauge + ":" + scaleValue(metric, scale);
-		connection.publish(gaugesTopic, metricMessage.getBytes(), QoS.AT_LEAST_ONCE, false);
+		connection.publish(gaugesTopic, metricMessage.getBytes(), QoS.AT_MOST_ONCE, false);
 	}
 
 	private String scaleValue(Metric metric, double scale) {

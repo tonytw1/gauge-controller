@@ -45,19 +45,19 @@ public class MqttConnectionFactory {
 	public BlockingConnection subscribeToMetricsTopic() throws URISyntaxException, Exception {
 		BlockingConnection connection = connectToMetricsHost();
 		log.info("Subscribing to topic '" + metricsTopic + "' on host '" + metricsHost + "'");
-		connection.subscribe(new Topic[] { new Topic(metricsTopic, QoS.AT_LEAST_ONCE) });
+		connection.subscribe(new Topic[] { new Topic(metricsTopic, QoS.AT_MOST_ONCE) });
 		return connection;
 	}
 
 	public BlockingConnection subscribeToGaugesTopic() throws Exception {
 		BlockingConnection connection = connectToGaugesHost();
 		log.info("Subscribing to topic: " + gaugesTopic);
-		connection.subscribe(new Topic[] { new Topic(gaugesTopic, QoS.AT_LEAST_ONCE) });
+		connection.subscribe(new Topic[] { new Topic(gaugesTopic, QoS.AT_MOST_ONCE) });
 		return connection;
 	}
 	
 	private BlockingConnection connectToMetricsHost() throws URISyntaxException, Exception {
-		log.info("Connecting to mertics host: " + metricsHost);
+		log.info("Connecting to metrics host: " + metricsHost);
 		MQTT mqtt = new MQTT();
 		mqtt.setHost(metricsHost, 1883);
 		BlockingConnection connection = mqtt.blockingConnection();

@@ -13,7 +13,7 @@ import uk.co.eelpieconsulting.monitoring.model.MetricType;
 @Component
 public class MetricsListener {
 	
-	private final static Logger log = Logger.getLogger(MetricRouting.class);
+	private final static Logger log = Logger.getLogger(MetricsListener.class);
 	
 	private final MqttConnectionFactory mqttConnectionFactory;
 	
