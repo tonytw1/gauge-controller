@@ -1,15 +1,19 @@
 package uk.co.eelpieconsulting.monitoring.model;
 
+import org.joda.time.DateTime;
+
 public class Metric implements Comparable {
 
 	private final String name, lastValue;
 	private final MetricType type;
+	private final DateTime date;
 	
-	public Metric(String name, MetricType type, String lastValue) {
+	public Metric(String name, MetricType type, String lastValue, DateTime date) {
 		super();
 		this.name = name;
 		this.type = type;
 		this.lastValue = lastValue;
+		this.date = date;
 	}
 
 	public String getName() {
@@ -24,10 +28,14 @@ public class Metric implements Comparable {
 		return lastValue;
 	}
 	
+	public DateTime getDate() {
+		return date;
+	}
+
 	@Override
 	public String toString() {
-		return "Metric [lastValue=" + lastValue + ", name=" + name + ", type="
-				+ type + "]";
+		return "Metric [name=" + name + ", lastValue=" + lastValue + ", type="
+				+ type + ", date=" + date + "]";
 	}
 
 	@Override

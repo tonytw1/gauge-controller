@@ -3,6 +3,7 @@ package uk.co.eelpieconsulting.monitoring;
 import org.apache.log4j.Logger;
 import org.fusesource.mqtt.client.BlockingConnection;
 import org.fusesource.mqtt.client.Message;
+import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -63,7 +64,7 @@ public class MetricsListener {
 	        	String[] fields = metricMessage.split(":");
 	        	String lastValue = fields[1];
 	        	MetricType type = lastValue.equals("true") || lastValue.equals("false") ? MetricType.BOOLEAN : MetricType.NUMBER;
-				Metric metric = new Metric(fields[0], type, lastValue);
+				Metric metric = new Metric(fields[0], type, lastValue, DateTime.now());
 	        	metricsDAO.registerMetric(metric);
 	        	
 	        	final boolean isRoutedMetric = routingDAO.isRoutedMetric(metric);

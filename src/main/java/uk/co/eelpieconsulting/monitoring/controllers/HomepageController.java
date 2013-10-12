@@ -1,5 +1,6 @@
 package uk.co.eelpieconsulting.monitoring.controllers;
 
+import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.stereotype.Controller;
@@ -53,7 +54,7 @@ public class HomepageController {
 
 		if (Strings.isNullOrEmpty(metric)) {
 			routingDAO.clearRouting(gauge);
-			final Metric nullMetric = new Metric(null, null, "0");
+			final Metric nullMetric = new Metric(null, null, "0", DateTime.now());
 			metricPublisher.publishOntoGaugesChannel(gauge, nullMetric, 1);
 			return new ModelAndView(new RedirectView("/"));		
 		}

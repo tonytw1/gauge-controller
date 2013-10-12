@@ -18,7 +18,7 @@ Metrics available: $availableMetrics.size()
 					<option value=""></option>
 					#foreach($metric in $availableMetrics) 
 						<option value="$metric.name" #if ($metric.name == $gaugeRoutes.get($gauge.name).metricName) SELECTED #end>$metric.name 
-							#if ($metric.lastValue) ($metric.lastValue) #end
+							#if ($metric.lastValue) ($metric.lastValue - $metric.date) #end
 						</option>											
 					#end
 				</select>
