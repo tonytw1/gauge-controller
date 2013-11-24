@@ -1,0 +1,21 @@
+<h4>Metrics</h4>
+<hr/>
+Metrics available: $availableMetrics.size()
+<hr/>
+
+<table>
+	#foreach ($metric in $availableMetrics) 
+		<tr>
+			<td>
+				$metric.name				
+			</td>
+			<td>
+				$metric.lastValue
+			</td>
+			<td>
+				$metric.date
+			</td>
+		</tr>
+	#end
+</table>
+<hr/>
