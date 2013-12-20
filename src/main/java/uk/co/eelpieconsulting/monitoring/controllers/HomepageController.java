@@ -18,7 +18,6 @@ import uk.co.eelpieconsulting.monitoring.model.Metric;
 
 import com.google.common.base.Strings;
 
-@EnableAutoConfiguration
 @Controller
 public class HomepageController {
 

@@ -9,7 +9,6 @@ import org.springframework.web.servlet.ModelAndView;
 
 import uk.co.eelpieconsulting.monitoring.MetricsDAO;
 
-@EnableAutoConfiguration
 @Controller
 public class MetricsController {
 
