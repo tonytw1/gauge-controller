@@ -35,6 +35,7 @@ public class RoutingDAO {
 		final String conf = IOUtils.toString(new FileInputStream(new File(confFile)));
 		if (Strings.isNullOrEmpty(conf)) {
 			this.routings = Maps.newConcurrentMap();
+			return;
 		}		
 		this.routings = objectMapper.readValue(conf, new TypeReference<Map<String, MetricRouting>>() {});
 	}
