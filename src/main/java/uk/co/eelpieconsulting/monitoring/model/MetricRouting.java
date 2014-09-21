@@ -1,10 +1,17 @@
 package uk.co.eelpieconsulting.monitoring.model;
 
-public class MetricRouting {
+import java.io.Serializable;
+
+public class MetricRouting implements Serializable {
 	
-	private final String gauge;
-	private final String metricName;
-	private final double scale;
+	private static final long serialVersionUID = 1L;
+	
+	private String gauge;
+	private String metricName;
+	private double scale;
+	
+	public MetricRouting() {
+	}
 	
 	public MetricRouting(String gauge, String metricName, double scale) {
 		this.gauge = gauge;

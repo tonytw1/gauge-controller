@@ -1,13 +1,22 @@
 package uk.co.eelpieconsulting.monitoring;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.io.IOUtils;
 import org.springframework.stereotype.Component;
 
 import uk.co.eelpieconsulting.monitoring.model.Metric;
 import uk.co.eelpieconsulting.monitoring.model.MetricRouting;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 
@@ -15,13 +24,26 @@ import com.google.common.collect.Maps;
 public class RoutingDAO {
 
 	private Map<String, MetricRouting> routings;
+	private ObjectMapper objectMapper;
 	
-	public RoutingDAO() {
+	private String confFile = "/home/tony/gauges.conf";
+	
+	public RoutingDAO() throws FileNotFoundException, IOException {
 		this.routings = Maps.newConcurrentMap();
+		objectMapper = new ObjectMapper();
+		
+		final String conf = IOUtils.toString(new FileInputStream(new File(confFile)));
+		if (Strings.isNullOrEmpty(conf)) {
+			this.routings = Maps.newConcurrentMap();
+		}		
+		this.routings = objectMapper.readValue(conf, new TypeReference<Map<String, MetricRouting>>() {});
 	}
 
-	public void setRouting(String gauge, String metricName, double scale) {
+	public void setRouting(String gauge, String metricName, double scale) throws FileNotFoundException, IOException {
 		routings.put(gauge, new MetricRouting(gauge, metricName, scale));
+		
+		final String conf = objectMapper.writeValueAsString(routings);
+		IOUtils.write(conf, new FileOutputStream(new File(confFile)));
 	}
 
 	public boolean isRoutedMetric(Metric metric) {
