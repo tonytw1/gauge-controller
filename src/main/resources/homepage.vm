@@ -2,7 +2,7 @@
 <hr/>
 Gauges detected: $gauges.size()
 <br/>
-Metrics available: $availableMetrics.size()
+Metrics available: <a href="/metrics">$availableMetrics.size()</a>
 <hr/>
 <table>
 	#foreach ($gauge in $gauges) 
