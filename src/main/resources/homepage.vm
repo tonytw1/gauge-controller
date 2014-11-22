@@ -23,7 +23,7 @@ Metrics available: <a href="/metrics">$availableMetrics.size()</a>
 					#end
 				</select>
 								
-				#if ($gauge.type == 'INDICATOR') 
+				#if ($gauge.type == 'INDICATOR' || $gauge.type == 'LAMP') 
 					<select name="scale">
 						<option value="-1" #if (-1 == $gaugeRoutes.get($gauge.name).scale) SELECTED #end>-1</option>
 						<option value="1" #if (1 == $gaugeRoutes.get($gauge.name).scale) SELECTED #end>1</option>
