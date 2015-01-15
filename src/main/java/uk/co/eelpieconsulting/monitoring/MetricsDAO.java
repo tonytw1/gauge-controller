@@ -1,23 +1,26 @@
 package uk.co.eelpieconsulting.monitoring;
 
-import java.util.Collections;
 import java.util.List;
-import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 import org.springframework.stereotype.Component;
 
 import uk.co.eelpieconsulting.monitoring.model.Metric;
 
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
+import com.google.common.collect.ImmutableSortedSet;
 
 @Component
 public class MetricsDAO {
 
-	private Map<String, Metric> metrics;
+	private final Cache<String, Metric> metrics;
 
 	public MetricsDAO() {
-		this.metrics = Maps.newConcurrentMap();
+		this.metrics = CacheBuilder.newBuilder().
+				maximumSize(100000).
+				expireAfterWrite(1, TimeUnit.DAYS).
+				build();		   
 	}
 	
 	public void registerMetric(Metric metric) {
@@ -25,17 +28,15 @@ public class MetricsDAO {
 	}
 	
 	public List<Metric> getMetrics() {
-		List<Metric> allMetrics = Lists.newArrayList(metrics.values());
-		Collections.sort(allMetrics);	// TODO guava way todo this?
-		return allMetrics;	// TODO immutable copy please
+		return ImmutableSortedSet.copyOf(metrics.asMap().values()).asList();
 	}
 	
 	public Metric getByName(String metricName) {
-		return metrics.get(metricName);
+		return metrics.getIfPresent(metricName);
 	}
 
 	public boolean isKnownMetricName(String metricName) {
-		return metrics.containsKey(metricName);
+		return metrics.getIfPresent(metricName) != null;
 	}
 	
 }
