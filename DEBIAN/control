@@ -1,0 +1,11 @@
+Package: gauge-control
+Version: %VERSION%
+Depends: openjdk-jdk-7
+Section: notice
+Priority: optional
+Architecture: all
+Essential: no
+Installed-Size: 1024
+Maintainer: Tony McCrae [tony@eelpieconsulting.co.uk]
+Provides: gauge-control
+Description: gauge-control

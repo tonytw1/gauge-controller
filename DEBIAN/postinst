@@ -1,0 +1,4 @@
+#!/bin/sh
+
+systemctl enable /etc/systemd/system/gauge-control.service
+systemctl restart gauge-control.service
