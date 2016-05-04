@@ -1,7 +1,7 @@
 Package: gauge-control
 Version: %VERSION%
-Depends: openjdk-jdk-7
-Section: notice
+Depends: openjdk-8-jdk
+Section: monitoring
 Priority: optional
 Architecture: all
 Essential: no
