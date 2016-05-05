@@ -9,6 +9,8 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.io.IOUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import uk.co.eelpieconsulting.monitoring.model.Metric;
@@ -25,14 +27,15 @@ public class RoutingDAO {
 
 	private Map<String, MetricRouting> routings;
 	private ObjectMapper objectMapper;
-	
-	private String confFile = "/home/tony/gauges.conf";
-	
-	public RoutingDAO() throws FileNotFoundException, IOException {
+
+	private String stateFile;
+
+	@Autowired
+	public RoutingDAO(@Value("${state.file}") String stateFile) throws IOException {
 		this.routings = Maps.newConcurrentMap();
 		objectMapper = new ObjectMapper();
 		
-		final String conf = IOUtils.toString(new FileInputStream(new File(confFile)));
+		final String conf = IOUtils.toString(new FileInputStream(new File(stateFile)));
 		if (Strings.isNullOrEmpty(conf)) {
 			this.routings = Maps.newConcurrentMap();
 			return;
@@ -40,11 +43,11 @@ public class RoutingDAO {
 		this.routings = objectMapper.readValue(conf, new TypeReference<Map<String, MetricRouting>>() {});
 	}
 
-	public void setRouting(String gauge, String metricName, double scale) throws FileNotFoundException, IOException {
+	public void setRouting(String gauge, String metricName, double scale) throws IOException {
 		routings.put(gauge, new MetricRouting(gauge, metricName, scale));
 		
 		final String conf = objectMapper.writeValueAsString(routings);
-		IOUtils.write(conf, new FileOutputStream(new File(confFile)));
+		IOUtils.write(conf, new FileOutputStream(new File(stateFile)));
 	}
 
 	public boolean isRoutedMetric(Metric metric) {
