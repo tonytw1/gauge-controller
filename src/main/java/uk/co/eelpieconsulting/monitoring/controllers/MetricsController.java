@@ -21,7 +21,7 @@ public class MetricsController {
 	
 	@RequestMapping(value="/metrics", method=RequestMethod.GET)
 	public ModelAndView homepage() {
-		return new ModelAndView("metrics").addObject("availableMetrics", metricsDAO.getMetrics());
+		return new ModelAndView("templates/metrics").addObject("availableMetrics", metricsDAO.getMetrics());
 	}	
 	
 }

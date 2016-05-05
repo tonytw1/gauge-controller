@@ -35,7 +35,7 @@ public class HomepageController {
 	
 	@RequestMapping(value="/", method=RequestMethod.GET)
 	public ModelAndView homepage() {
-		ModelAndView mv = new ModelAndView("homepage").
+		ModelAndView mv = new ModelAndView("templates/homepage").
 			addObject("gauges", gaugeDAO.getGauges()).
 			addObject("availableMetrics", metricsDAO.getMetrics()).
 			addObject("gaugeRoutes", routingDAO.getGaugeRoutes());
@@ -65,6 +65,5 @@ public class HomepageController {
 		metricPublisher.publishOntoGaugesChannel(gauge, metricsDAO.getByName(metric), scale);	// TODO race condition
 		return new ModelAndView(new RedirectView("/"));		
 	}
-	
-	
+
 }
