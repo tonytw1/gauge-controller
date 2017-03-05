@@ -43,14 +43,14 @@ public class GaugesListener {
 		        	final Message message = connection.receive();
 		        	byte[] payload = message.getPayload();
 		        	String messageString = new String(payload, "UTF-8");
-		        	log.debug("Got gauges message: " + messageString);
+		        	log.info("Got gauges message: " + messageString);
 		        	try {
-
 						for (String gaugePrefix: GAUGE_PREFIXES) {
 							final String prefix = gaugePrefix + ":";
 							if (messageString.startsWith(prefix)) {
-								final String gaugeDescripition = messageString.split(prefix)[1];
-								gaugeDAO.registerGauge(parseGaugeDescription(gaugeDescripition));
+								log.info("Processing guage message for prefix (" + prefix + ") :" + messageString);
+								final String gaugeDescription = messageString.split(prefix)[1];
+								gaugeDAO.registerGauge(parseGaugeDescription(gaugeDescription));
 							}
 		        		}		        		
 		        	} catch (Exception e) {
