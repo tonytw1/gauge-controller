@@ -48,9 +48,9 @@ public class GaugesListener {
 						for (String gaugePrefix: GAUGE_PREFIXES) {
 							final String prefix = gaugePrefix + ":";
 							if (messageString.startsWith(prefix)) {
-								log.info("Processing gauge message for prefix (" + prefix + "): " + messageString);
-								final String gaugeDescription = messageString.replace(prefix, "");
-								gaugeDAO.registerGauge(parseGaugeDescription(gaugeDescription));
+								log.info("Processing guage message for prefix (" + prefix + ") :" + messageString);
+								final String gaugeDescription = messageString.split(":")[1];
+								gaugeDAO.registerGauge(parseGaugeDescription(gaugePrefix, gaugeDescription));
 							}
 		        		}		        		
 		        	} catch (Exception e) {
@@ -63,9 +63,8 @@ public class GaugesListener {
 			}
 		}
 
-		private Gauge parseGaugeDescription(String gaugeDescripition) {
-			return new Gauge(gaugeDescripition.split(",")[0], GaugeType.valueOf(gaugeDescripition.split(",")[1].toUpperCase()));
+		private Gauge parseGaugeDescription(String gaugePrefix, String gaugeDescripition) {
+			return new Gauge(gaugeDescripition, GaugeType.valueOf(gaugePrefix.toUpperCase()));
 		}
-		
 	}
 }
