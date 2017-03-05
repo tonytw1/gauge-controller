@@ -23,7 +23,7 @@ public class GaugeDAO {
 	}
 	
 	public void registerGauge(Gauge gauge) {
-		log.debug("Registering gauge: " + gauge);
+		log.info("Registering gauge: " + gauge);
 		gauges.put(gauge.getName(), gauge);
 	}
 	
