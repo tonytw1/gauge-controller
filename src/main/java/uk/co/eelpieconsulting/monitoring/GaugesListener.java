@@ -48,8 +48,8 @@ public class GaugesListener {
 						for (String gaugePrefix: GAUGE_PREFIXES) {
 							final String prefix = gaugePrefix + ":";
 							if (messageString.startsWith(prefix)) {
-								log.info("Processing guage message for prefix (" + prefix + ") :" + messageString);
-								final String gaugeDescription = messageString.split(prefix)[1];
+								log.info("Processing gauge message for prefix (" + prefix + "): " + messageString);
+								final String gaugeDescription = messageString.replace(prefix, "");
 								gaugeDAO.registerGauge(parseGaugeDescription(gaugeDescription));
 							}
 		        		}		        		
