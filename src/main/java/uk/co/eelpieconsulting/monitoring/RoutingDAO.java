@@ -73,7 +73,7 @@ public class RoutingDAO {
 	}
 
 	private void persistRoutingsToFile() throws IOException {
-		if (Strings.isNullOrEmpty(stateFile)) {
+		if (!Strings.isNullOrEmpty(stateFile)) {
 			final String conf = objectMapper.writeValueAsString(routings);
 			IOUtils.write(conf, new FileOutputStream(new File(stateFile)));
 		}
