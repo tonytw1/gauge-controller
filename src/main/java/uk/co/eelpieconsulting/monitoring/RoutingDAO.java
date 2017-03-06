@@ -46,9 +46,7 @@ public class RoutingDAO {
 
 	public void setRouting(String gauge, String metricName, double scale) throws IOException {
 		routings.put(gauge, new MetricRouting(gauge, metricName, scale));
-		
-		final String conf = objectMapper.writeValueAsString(routings);
-		IOUtils.write(conf, new FileOutputStream(new File(stateFile)));
+		persistRoutingsToFile();
 	}
 
 	public boolean isRoutedMetric(Metric metric) {
@@ -69,8 +67,16 @@ public class RoutingDAO {
 		return routings;
 	}
 
-	public void clearRouting(String gauge) {
+	public void clearRouting(String gauge) throws IOException {
 		routings.remove(gauge);
+		persistRoutingsToFile();
+	}
+
+	private void persistRoutingsToFile() throws IOException {
+		if (Strings.isNullOrEmpty(stateFile)) {
+			final String conf = objectMapper.writeValueAsString(routings);
+			IOUtils.write(conf, new FileOutputStream(new File(stateFile)));
+		}
 	}
 
 }
