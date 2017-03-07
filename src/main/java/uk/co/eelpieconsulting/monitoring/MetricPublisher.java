@@ -1,16 +1,15 @@
 package uk.co.eelpieconsulting.monitoring;
 
-import java.net.URISyntaxException;
-
 import org.apache.log4j.Logger;
 import org.fusesource.mqtt.client.BlockingConnection;
 import org.fusesource.mqtt.client.QoS;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-
 import uk.co.eelpieconsulting.monitoring.model.Metric;
 import uk.co.eelpieconsulting.monitoring.model.MetricType;
+
+import java.net.URISyntaxException;
 
 @Component
 public class MetricPublisher {
@@ -38,12 +37,17 @@ public class MetricPublisher {
 	private String scaleValue(Metric metric, double scale) {
 		if (metric.getType() == MetricType.BOOLEAN) {
 			if (scale == -1) {
-				return Boolean.toString(!Boolean.parseBoolean(metric.getLastValue()));
+				return booleanToIntString(!Boolean.parseBoolean(metric.getLastValue()));
 			}
-			return metric.getLastValue();
+			return booleanToIntString(Boolean.parseBoolean(metric.getLastValue()));
 		}
 		
 		return Double.toString(Double.parseDouble(metric.getLastValue()) * scale);		
 	}
-	
+
+	private String booleanToIntString(boolean b) {
+		int v = b ? 1 : -1;
+		return Integer.toString(v);
+	}
+
 }
