@@ -46,7 +46,7 @@ public class MetricPublisher {
 	}
 
 	private String booleanToIntString(boolean b) {
-		int v = b ? 1 : -1;
+		int v = b ? 1 : 0;
 		return Integer.toString(v);
 	}
 
