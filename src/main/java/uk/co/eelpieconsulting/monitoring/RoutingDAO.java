@@ -1,82 +1,96 @@
 package uk.co.eelpieconsulting.monitoring;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.util.List;
-import java.util.Map;
-
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+import io.minio.MinioClient;
+import io.minio.errors.InvalidEndpointException;
+import io.minio.errors.InvalidPortException;
 import org.apache.commons.io.IOUtils;
+import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-
 import uk.co.eelpieconsulting.monitoring.model.Metric;
 import uk.co.eelpieconsulting.monitoring.model.MetricRouting;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.base.Strings;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
+import java.io.InputStream;
+import java.io.StringBufferInputStream;
+import java.util.List;
+import java.util.Map;
 
 @Component
 public class RoutingDAO {
 
-	private Map<String, MetricRouting> routings;
-	private ObjectMapper objectMapper;
+  private final static Logger log = Logger.getLogger(RoutingDAO.class);
 
-	private String stateFile;
+  private final MinioClient minioClient;
+  private final Map<String, MetricRouting> routings;
+  private final ObjectMapper objectMapper;
 
-	@Autowired
-	public RoutingDAO(@Value("${state.file}") String stateFile) throws IOException {
-		this.routings = Maps.newConcurrentMap();
-		objectMapper = new ObjectMapper();
-		
-		if (Strings.isNullOrEmpty(stateFile)) {
-			this.routings = Maps.newConcurrentMap();
-			return;
-		}
+  private final String bucketName = "gauge-controller";
+  private final String filename = "routings.json";
 
-		final String conf = IOUtils.toString(new FileInputStream(new File(stateFile)));
-		this.routings = objectMapper.readValue(conf, new TypeReference<Map<String, MetricRouting>>() {});
-	}
+  @Autowired
+  public RoutingDAO(
+          @Value("${state.s3.endpoint}") String endPoint,
+          @Value("${state.s3.accesskey}") String accessKey,
+          @Value("${state.s3.secretkey}") String secretKey
+  ) throws InvalidPortException, InvalidEndpointException {
+    this.objectMapper = new ObjectMapper();
+    this.minioClient = new MinioClient(endPoint, accessKey, secretKey);
+    this.routings = loadRoutings();
+  }
 
-	public void setRouting(String gauge, String metricName, double scale) throws IOException {
-		routings.put(gauge, new MetricRouting(gauge, metricName, scale));
-		persistRoutingsToFile();
-	}
+  public boolean isRoutedMetric(Metric metric) {
+    return !getRoutingsForMetric(metric.getName()).isEmpty();
+  }
 
-	public boolean isRoutedMetric(Metric metric) {
-		return !getRoutingsForMetric(metric.getName()).isEmpty();
-	}
+  public List<MetricRouting> getRoutingsForMetric(String metricName) {
+    List<MetricRouting> metricRoutings = Lists.newArrayList();
+    for (MetricRouting metricRouting : routings.values()) {
+      if (metricRouting.getMetricName().equals(metricName)) {
+        metricRoutings.add(metricRouting);
+      }
+    }
+    return metricRoutings;
+  }
 
-	public List<MetricRouting> getRoutingsForMetric(String metricName) {
-		List<MetricRouting> metricRoutings = Lists.newArrayList();
-		for (MetricRouting metricRouting : routings.values()) {
-			if (metricRouting.getMetricName().equals(metricName)) {
-				metricRoutings.add(metricRouting);
-			}
-		}
-		return metricRoutings;
-	}
+  public Map<String, MetricRouting> getGaugeRoutes() {
+    return routings;
+  }
 
-	public Map<String, MetricRouting> getGaugeRoutes() {
-		return routings;
-	}
+  public void setRouting(String gauge, String metricName, double scale) {
+    routings.put(gauge, new MetricRouting(gauge, metricName, scale));
+    persistRoutings(routings);
+  }
 
-	public void clearRouting(String gauge) throws IOException {
-		routings.remove(gauge);
-		persistRoutingsToFile();
-	}
+  public void clearRouting(String gauge) {
+    routings.remove(gauge);
+    persistRoutings(routings);
+  }
 
-	private void persistRoutingsToFile() throws IOException {
-		if (!Strings.isNullOrEmpty(stateFile)) {
-			final String conf = objectMapper.writeValueAsString(routings);
-			IOUtils.write(conf, new FileOutputStream(new File(stateFile)));
-		}
-	}
+  private void persistRoutings(Map<String, MetricRouting> routings) {
+    try {
+      final String asJson = objectMapper.writeValueAsString(routings);
+      minioClient.putObject(bucketName, filename, new StringBufferInputStream(asJson), "appplication/json");
+    } catch (Exception e) {
+      log.error("Failed to persist routes", e);
+      throw new RuntimeException(e);
+    }
+  }
+
+  private Map<String, MetricRouting> loadRoutings() {
+    try {
+      InputStream object = minioClient.getObject(bucketName, filename);
+      String json = IOUtils.toString(object);
+      return objectMapper.readValue(json, new TypeReference<Map<String, MetricRouting>>() {
+      });
+    } catch (Exception e) {
+      log.error("Failed to load routes; returning empty", e);
+      return Maps.newConcurrentMap();
+    }
+  }
 
 }
