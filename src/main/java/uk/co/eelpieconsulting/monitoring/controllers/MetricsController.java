@@ -36,7 +36,12 @@ public class MetricsController {
     List<Metric> cleaned = Lists.newArrayList();
     for (Metric m: metrics) {
 		  String safeName = NO_ODD_CHARACTERS.matcher(m.getName()).replaceAll("");
-		  cleaned.add(new Metric(safeName, m.getType(), m.getLastValue(), m.getDate()));
+
+		  try {
+		    Double.parseDouble(m.getLastValue());
+        cleaned.add(new Metric(safeName, m.getType(), m.getLastValue(), m.getDate()));
+      } catch (Exception e) {
+      }
     }
 
 		return new ModelAndView("templates/export").addObject("availableMetrics", cleaned);
