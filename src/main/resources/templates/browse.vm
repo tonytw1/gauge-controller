@@ -4,10 +4,10 @@ Metrics available: $availableMetrics.size()
 <hr/>
 
 <table>
-	#foreach ($metric in $availableMetrics) 
+	#foreach ($metric in $availableMetrics)
 		<tr>
 			<td>
-				$metric.name				
+				$metric.name
 			</td>
 			<td>
 				$metric.lastValue

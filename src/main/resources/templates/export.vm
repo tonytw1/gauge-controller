@@ -1,0 +1,3 @@
+#foreach ($metric in $availableMetrics)
+$metric.name $metric.lastValue
+#end
