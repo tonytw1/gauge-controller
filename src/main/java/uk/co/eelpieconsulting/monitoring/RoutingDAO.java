@@ -29,18 +29,20 @@ public class RoutingDAO {
   private final Map<String, MetricRouting> routings;
   private final ObjectMapper objectMapper;
 
-  private final String bucketName = "gauge-controller";
+  private final String bucketName;
   private final String filename = "routings.json";
 
   @Autowired
   public RoutingDAO(
           @Value("${state.s3.endpoint}") String endPoint,
           @Value("${state.s3.accesskey}") String accessKey,
-          @Value("${state.s3.secretkey}") String secretKey
+          @Value("${state.s3.secretkey}") String secretKey,
+          @Value("${state.s3.bucket}") String bucketName
   ) throws InvalidPortException, InvalidEndpointException {
     this.objectMapper = new ObjectMapper();
     this.minioClient = new MinioClient(endPoint, accessKey, secretKey);
     this.routings = loadRoutings();
+    this.bucketName = bucketName;
   }
 
   public boolean isRoutedMetric(Metric metric) {
