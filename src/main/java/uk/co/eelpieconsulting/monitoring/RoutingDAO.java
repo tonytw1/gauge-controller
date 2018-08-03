@@ -41,8 +41,8 @@ public class RoutingDAO {
   ) throws InvalidPortException, InvalidEndpointException {
     this.objectMapper = new ObjectMapper();
     this.minioClient = new MinioClient(endPoint, accessKey, secretKey);
-    this.routings = loadRoutings();
     this.bucketName = bucketName;
+    this.routings = loadRoutings();
   }
 
   public boolean isRoutedMetric(Metric metric) {
