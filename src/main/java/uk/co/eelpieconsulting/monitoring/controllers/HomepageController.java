@@ -1,9 +1,7 @@
 package uk.co.eelpieconsulting.monitoring.controllers;
 
-import com.google.common.base.Function;
 import com.google.common.base.Strings;
-import com.google.common.collect.*;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import com.google.common.collect.Lists;
 import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -28,22 +26,7 @@ public class HomepageController {
 	private final RoutingDAO routingDAO;
 	private final MetricPublisher metricPublisher;
 
-	private final Iterable<Double> powersOfTen = Iterables.transform(ContiguousSet.create(Range.closed(-2, 2), DiscreteDomain.integers()).asList(),
-									new Function<Integer, Double>() {
-										@Nullable
-										@Override
-										public Double apply(@Nullable Integer i) {
-											return Math.pow(10, i);
-										}
-									});
-
-	private final Iterable<Double>  negativePowersOfTen = Iterables.transform(powersOfTen, new Function<Double, Double>() {
-		@Nullable
-		@Override
-		public Double apply(@Nullable Double aDouble) {
-			return -aDouble;
-		}
-	});
+	private final List<Double> scales = Lists.newArrayList(-100.0, -10.0, -1.0, -0.1, 0.1, 1.0, 10.0, 100.0);
 
 	@Autowired
 	public HomepageController(GaugeDAO gaugeDAO, MetricsDAO metricsDAO, RoutingDAO routingDAO, MetricPublisher metricPublisher) {
@@ -55,9 +38,6 @@ public class HomepageController {
 	
 	@RequestMapping(value="/", method=RequestMethod.GET)
 	public ModelAndView homepage() {
-		List<Double> scales = Lists.newArrayList(Iterables.concat(negativePowersOfTen, powersOfTen));
-		scales.sort(Ordering.natural());
-
 		ModelAndView mv = new ModelAndView("templates/homepage").
 			addObject("gauges", gaugeDAO.getGauges()).
 			addObject("availableMetrics", metricsDAO.getMetrics()).
