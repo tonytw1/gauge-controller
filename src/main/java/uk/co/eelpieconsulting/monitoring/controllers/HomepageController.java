@@ -26,7 +26,7 @@ public class HomepageController {
 	private final RoutingDAO routingDAO;
 	private final MetricPublisher metricPublisher;
 
-	private final List<Double> scales = Lists.newArrayList(-100.0, -10.0, -1.0, -0.1, 0.1, 1.0, 10.0, 100.0);
+	private final List<Double> scales = Lists.newArrayList(-1.0, 0.01, 0.1, 1.0, 10.0, 100.0);
 
 	@Autowired
 	public HomepageController(GaugeDAO gaugeDAO, MetricsDAO metricsDAO, RoutingDAO routingDAO, MetricPublisher metricPublisher) {
