@@ -10,6 +10,9 @@ Metrics available: <a href="/browse">$availableMetrics.size()</a>
 		<tr>
 			<td>
 				$gauge.name
+				#if($gauge.fsd)
+				    ($gauge.fsd)
+				#end
 				<br/>
 				<input name="gauge" type="hidden" value="$gauge.name"/>
 			</td>
@@ -19,7 +22,7 @@ Metrics available: <a href="/browse">$availableMetrics.size()</a>
 					#foreach($metric in $availableMetrics) 
 						<option value="$metric.name" #if ($metric.name == $gaugeRoutes.get($gauge.name).metricName) SELECTED #end>$metric.name 
 							#if ($metric.lastValue) ($metric.lastValue - $metric.date) #end
-						</option>											
+						</option>
 					#end
 				</select>
                 <select name="scale">
@@ -27,7 +30,7 @@ Metrics available: <a href="/browse">$availableMetrics.size()</a>
                         <option value="$scale" #if ($scale == $gaugeRoutes.get($gauge.name).scale) SELECTED #end >$scale</option>
                     #end
                 </select>
-				<input type="submit" value="set"/>				
+				<input type="submit" value="set"/>
 			</td>
 		</tr>
 		</form>
