@@ -11,3 +11,16 @@ Routed metrics are scaled and echoed into the gauges channel.
 
 The routing table is persisted to an S3 bucket.
 
+## Build
+
+Spring Boot / Maven project.
+
+```
+mvn clean package
+```
+
+Which will give a runnable fat jar file
+
+```
+java -jar target/gauge-controller-0.0.1-SNAPSHOT.jar --spring.config.location=application.properties
+```
