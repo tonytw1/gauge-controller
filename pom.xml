@@ -107,11 +107,11 @@
 			<artifactId>mqtt-client</artifactId>
 			<version>1.6-SNAPSHOT</version>
 		</dependency>
-				
+
 		<dependency>
 			<groupId>com.google.guava</groupId>
 			<artifactId>guava</artifactId>
-			<version>16.0</version>
+			<version>26.0-jre</version>
 		</dependency>
 
 		<dependency>
