@@ -1,6 +1,6 @@
 # Gauge controller
 
-Simple UI and router to cherry pick metrics from the metrics bus and send them to display devices; namely the [https://github.com/tonytw1/analog-monitoring-system](analog monitoring dashboard).
+Simple router and UI to cherry pick metrics from the metrics bus and send them to display devices; namely the [analog monitoring dashboard](https://github.com/tonytw1/analog-monitoring-system).
 
 Metrics are made available on a metrics MQTT channel. The display devices listen on a seperate gauges MQTT channel and periodically announce themselves.
 
