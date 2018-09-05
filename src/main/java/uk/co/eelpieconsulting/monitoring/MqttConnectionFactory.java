@@ -13,9 +13,10 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class MqttConnectionFactory {
-	
-	private final static Logger log = Logger.getLogger(MqttConnectionFactory.class);
-	
+
+	private static final Logger log = Logger.getLogger(MqttConnectionFactory.class);
+	private static final int MQTT_PORT = 1883;
+
 	private final String metricsHost;
 	private final String metricsTopic;
 	private final String gaugesHost;
@@ -36,7 +37,7 @@ public class MqttConnectionFactory {
 	public BlockingConnection connectToGaugesHost() throws URISyntaxException, Exception {
 		log.info("Connecting to gauges host: " + gaugesHost);
 		MQTT mqtt = new MQTT();
-		mqtt.setHost(gaugesHost, 1883);
+		mqtt.setHost(gaugesHost, MQTT_PORT);
 		BlockingConnection connection = mqtt.blockingConnection();
 		connection.connect();
 		return connection;
@@ -59,7 +60,7 @@ public class MqttConnectionFactory {
 	private BlockingConnection connectToMetricsHost() throws URISyntaxException, Exception {
 		log.info("Connecting to metrics host: " + metricsHost);
 		MQTT mqtt = new MQTT();
-		mqtt.setHost(metricsHost, 1883);
+		mqtt.setHost(metricsHost, MQTT_PORT);
 		BlockingConnection connection = mqtt.blockingConnection();
 		connection.connect();
 		return connection;
