@@ -1,15 +1,15 @@
 package uk.co.eelpieconsulting.monitoring;
 
-import java.util.List;
-import java.util.Map;
-
+import com.google.common.collect.Maps;
+import com.google.common.collect.Ordering;
 import org.apache.log4j.Logger;
 import org.springframework.stereotype.Component;
-
 import uk.co.eelpieconsulting.monitoring.model.Gauge;
 
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
+import javax.annotation.Nullable;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 @Component
 public class GaugeDAO {
@@ -17,6 +17,13 @@ public class GaugeDAO {
 	private final static Logger log = Logger.getLogger(GaugeDAO.class);
 	
 	private Map<String, Gauge> gauges;
+
+	private Ordering<Gauge> byGaugeName = new Ordering<Gauge>() {
+		@Override
+		public int compare(@Nullable Gauge gauge, @Nullable Gauge gauge2) {
+			return gauge.getName().compareTo(gauge2.getName());
+		}
+	};
 
 	public GaugeDAO() {
 		this.gauges = Maps.newConcurrentMap();
@@ -28,7 +35,9 @@ public class GaugeDAO {
 	}
 	
 	public List<Gauge> getGauges() {
-		return Lists.newArrayList(gauges.values());
+		List<Gauge> gauges = new ArrayList<>(this.gauges.values());
+		gauges.sort(byGaugeName);
+		return gauges;
 	}
 
 	public boolean isKnownGaugeName(String gaugeName) {
