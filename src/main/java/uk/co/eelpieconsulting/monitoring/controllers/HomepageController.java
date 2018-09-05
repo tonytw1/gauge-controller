@@ -1,5 +1,9 @@
 package uk.co.eelpieconsulting.monitoring.controllers;
 
+import com.google.common.base.Function;
+import com.google.common.base.Strings;
+import com.google.common.collect.*;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -8,14 +12,13 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.view.RedirectView;
-
 import uk.co.eelpieconsulting.monitoring.GaugeDAO;
 import uk.co.eelpieconsulting.monitoring.MetricPublisher;
 import uk.co.eelpieconsulting.monitoring.MetricsDAO;
 import uk.co.eelpieconsulting.monitoring.RoutingDAO;
 import uk.co.eelpieconsulting.monitoring.model.Metric;
 
-import com.google.common.base.Strings;
+import java.util.List;
 
 @Controller
 public class HomepageController {
@@ -24,7 +27,24 @@ public class HomepageController {
 	private final MetricsDAO metricsDAO;
 	private final RoutingDAO routingDAO;
 	private final MetricPublisher metricPublisher;
-	
+
+	private final Iterable<Double> powersOfTen = Iterables.transform(ContiguousSet.create(Range.closed(-2, 2), DiscreteDomain.integers()).asList(),
+									new Function<Integer, Double>() {
+										@Nullable
+										@Override
+										public Double apply(@Nullable Integer i) {
+											return Math.pow(10, i);
+										}
+									});
+
+	private final Iterable<Double>  negativePowersOfTen = Iterables.transform(powersOfTen, new Function<Double, Double>() {
+		@Nullable
+		@Override
+		public Double apply(@Nullable Double aDouble) {
+			return -aDouble;
+		}
+	});
+
 	@Autowired
 	public HomepageController(GaugeDAO gaugeDAO, MetricsDAO metricsDAO, RoutingDAO routingDAO, MetricPublisher metricPublisher) {
 		this.gaugeDAO = gaugeDAO;
@@ -35,9 +55,13 @@ public class HomepageController {
 	
 	@RequestMapping(value="/", method=RequestMethod.GET)
 	public ModelAndView homepage() {
+		List<Double> scales = Lists.newArrayList(Iterables.concat(negativePowersOfTen, powersOfTen));
+		scales.sort(Ordering.natural());
+
 		ModelAndView mv = new ModelAndView("templates/homepage").
 			addObject("gauges", gaugeDAO.getGauges()).
 			addObject("availableMetrics", metricsDAO.getMetrics()).
+			addObject("scales", scales).
 			addObject("gaugeRoutes", routingDAO.getGaugeRoutes());
 		return mv;
 	}

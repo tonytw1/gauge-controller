@@ -22,20 +22,11 @@ Metrics available: <a href="/browse">$availableMetrics.size()</a>
 						</option>											
 					#end
 				</select>
-
                 <select name="scale">
-                    <option value="0.01" #if (0.01 == $gaugeRoutes.get($gauge.name).scale) SELECTED #end >0.01</option>
-                    <option value="0.1" #if (0.1 == $gaugeRoutes.get($gauge.name).scale) SELECTED #end >0.1</option>
-                    <option value="1" #if (1 == $gaugeRoutes.get($gauge.name).scale) SELECTED #end>1</option>
-                    <option value="10" #if (10 == $gaugeRoutes.get($gauge.name).scale) SELECTED #end>10</option>
-                    <option value="100" #if (100 == $gaugeRoutes.get($gauge.name).scale) SELECTED #end>100</option>
-                    <option value="-0.01" #if (-0.01 == $gaugeRoutes.get($gauge.name).scale) SELECTED #end >-0.01</option>
-                    <option value="-0.1" #if (-0.1 == $gaugeRoutes.get($gauge.name).scale) SELECTED #end >-0.1</option>
-                    <option value="-1" #if (-1 == $gaugeRoutes.get($gauge.name).scale) SELECTED #end>-1</option>
-                    <option value="-10" #if (-10 == $gaugeRoutes.get($gauge.name).scale) SELECTED #end>-10</option>
-                    <option value="-100" #if (-100 == $gaugeRoutes.get($gauge.name).scale) SELECTED #end>-100</option>
+                    #foreach($scale in $scales)
+                        <option value="$scale" #if ($scale == $gaugeRoutes.get($gauge.name).scale) SELECTED #end >$scale</option>
+                    #end
                 </select>
-
 				<input type="submit" value="set"/>				
 			</td>
 		</tr>
