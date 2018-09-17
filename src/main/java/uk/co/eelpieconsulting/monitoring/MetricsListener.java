@@ -70,7 +70,7 @@ public class MetricsListener {
 	        	final boolean isRoutedMetric = routingDAO.isRoutedMetric(metric);
 				if (isRoutedMetric) {
 					for (MetricRouting routing : routingDAO.getRoutingsForMetric(metric.getName())) {
-						metricPublisher.publishOntoGaugesChannel(routing.getGauge(), metric, routing.getScale());						
+						metricPublisher.publishOntoGaugesChannel(routing.getGauge(), metric, routing.getTransform());
 					}
 	        	}
 				

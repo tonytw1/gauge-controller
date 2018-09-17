@@ -7,47 +7,43 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import uk.co.eelpieconsulting.monitoring.model.Metric;
-import uk.co.eelpieconsulting.monitoring.model.MetricType;
+import uk.co.eelpieconsulting.monitoring.model.transforms.Transform;
 
 import java.net.URISyntaxException;
 
 @Component
 public class MetricPublisher {
-	
-	private final static Logger log = Logger.getLogger(MetricPublisher.class);
 
-	private final BlockingConnection connection;
-	
-	private final String gaugesTopic;
+  private final static Logger log = Logger.getLogger(MetricPublisher.class);
 
-	@Autowired
-	public MetricPublisher(MqttConnectionFactory mqttConnectionFactory,
-			@Value(value = "${mqtt.gauges.topic}") String gaugesTopic) throws URISyntaxException, Exception {
-		this.connection = mqttConnectionFactory.connectToGaugesHost();	
+  private final BlockingConnection connection;
 
-		this.gaugesTopic = gaugesTopic;
-	}
-	
-	public void publishOntoGaugesChannel(String gauge, Metric metric, double scale) throws Exception {
-		log.debug("Publishing routed metric: " + metric + " to gauge: " + gauge + " scaled by: " + scale);			
-		final String metricMessage = gauge + ":" + scaleValue(metric, scale);
-		connection.publish(gaugesTopic, metricMessage.getBytes(), QoS.AT_MOST_ONCE, false);
-	}
+  private final String gaugesTopic;
 
-	private String scaleValue(Metric metric, double scale) {
-		if (metric.getType() == MetricType.BOOLEAN) {
-			if (scale == -1) {
-				return booleanToIntString(!Boolean.parseBoolean(metric.getLastValue()));
-			}
-			return booleanToIntString(Boolean.parseBoolean(metric.getLastValue()));
-		}
-		
-		return Double.toString(Double.parseDouble(metric.getLastValue()) * scale);		
-	}
+  @Autowired
+  public MetricPublisher(MqttConnectionFactory mqttConnectionFactory,
+                         @Value(value = "${mqtt.gauges.topic}") String gaugesTopic) throws URISyntaxException, Exception {
+    this.connection = mqttConnectionFactory.connectToGaugesHost();
 
-	private String booleanToIntString(boolean b) {
-		int v = b ? 1 : 0;
-		return Integer.toString(v);
-	}
+    this.gaugesTopic = gaugesTopic;
+  }
+
+  public void publishOntoGaugesChannel(String gauge, Metric metric, Transform transform) throws Exception {
+    log.debug("Publishing routed metric: " + metric + " to gauge: " + gauge + " transformed by: " + transform);
+    String transformed = transformValue(metric, transform);
+    if (transformed != null) {
+      final String metricMessage = gauge + ":" + transformed;
+      connection.publish(gaugesTopic, metricMessage.getBytes(), QoS.AT_MOST_ONCE, false);
+    }
+  }
+
+  private String transformValue(Metric metric, Transform transform) {
+    try {
+      return transform.transform(metric);
+    } catch (Exception e) {
+      log.warn("Failed to transform metric");
+      return null;
+    }
+  }
 
 }

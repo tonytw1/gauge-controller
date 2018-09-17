@@ -15,7 +15,7 @@ import org.springframework.stereotype.Component;
 public class MqttConnectionFactory {
 
 	private static final Logger log = Logger.getLogger(MqttConnectionFactory.class);
-	private static final int MQTT_PORT = 1883;
+	private static final int MQTT_PORT = 32183;
 
 	private final String metricsHost;
 	private final String metricsTopic;

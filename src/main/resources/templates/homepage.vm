@@ -25,9 +25,9 @@ Metrics available: <a href="/browse">$availableMetrics.size()</a>
 						</option>
 					#end
 				</select>
-                <select name="scale">
-                    #foreach($scale in $scales)
-                        <option value="$scale" #if ($scale == $gaugeRoutes.get($gauge.name).scale) SELECTED #end >$scale</option>
+                <select name="transform">
+                    #foreach($transform in $transforms)
+                        <option value="$transform.name" #if ($transform == $gaugeRoutes.get($gauge.name).transform) SELECTED #end >$transform.name</option>
                     #end
                 </select>
 				<input type="submit" value="set"/>
