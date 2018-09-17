@@ -39,11 +39,13 @@ public class MetricPublisher {
 
   private String transformValue(Metric metric, Transform transform) {
     try {
-      return transform.transform(metric);
-    } catch (Exception e) {
+      if (metric.getLastValue() != null) {
+        return transform.transform(metric);
+      }
+    } catch (Exception e){
       log.warn("Failed to transform metric");
-      return null;
     }
+    return null;
   }
 
 }

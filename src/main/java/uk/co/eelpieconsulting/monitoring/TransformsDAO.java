@@ -23,7 +23,8 @@ public class TransformsDAO {
           new Scaled(100.0),
           new Scaled(1000.0),
           new FromBoolean(),
-          new FromInvertedBoolean()
+          new FromInvertedBoolean(),
+          new FromHex()
   );
 
   public Transform transformByName(String transformName) {
