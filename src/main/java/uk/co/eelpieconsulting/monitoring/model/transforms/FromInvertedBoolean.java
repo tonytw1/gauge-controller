@@ -15,7 +15,7 @@ public class FromInvertedBoolean implements Transform {
   }
 
   private String booleanToIntString(boolean b) {
-    return Integer.toString(b ? 1 : 0);
+    return Integer.toString(b ? 0 : 1);
   }
 
 }
