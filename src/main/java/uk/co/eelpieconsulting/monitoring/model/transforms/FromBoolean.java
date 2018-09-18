@@ -5,7 +5,7 @@ import uk.co.eelpieconsulting.monitoring.model.Metric;
 public class FromBoolean implements Transform {
   @Override
   public String getName() {
-    return "invert boolean";
+    return "boolean";
   }
 
   @Override
