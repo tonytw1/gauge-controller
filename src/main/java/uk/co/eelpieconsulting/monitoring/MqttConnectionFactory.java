@@ -1,7 +1,5 @@
 package uk.co.eelpieconsulting.monitoring;
 
-import java.net.URISyntaxException;
-
 import org.apache.log4j.Logger;
 import org.fusesource.mqtt.client.BlockingConnection;
 import org.fusesource.mqtt.client.MQTT;
@@ -11,33 +9,40 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import java.net.URISyntaxException;
+
 @Component
 public class MqttConnectionFactory {
 
 	private static final Logger log = Logger.getLogger(MqttConnectionFactory.class);
-	private static final int MQTT_PORT = 32183;
 
 	private final String metricsHost;
+	private final int metricsPort;
 	private final String metricsTopic;
 	private final String gaugesHost;
+	private final int gaugesPort;
 	private final String gaugesTopic;
 
 	@Autowired
 	public MqttConnectionFactory(
 			@Value("${mqtt.metrics.host}") String metricsHost,
+			@Value("${mqtt.metrics.port}") int metricsPort,
 			@Value("${mqtt.metrics.topic}") String metricsTopic,
 			@Value("${mqtt.gauges.host}") String gaugesHost,
+			@Value("${mqtt.gauges.port}") int gaugesPort,
 			@Value("${mqtt.gauges.topic}") String gaugesTopic) {
 		this.metricsHost = metricsHost;
+		this.metricsPort = metricsPort;
 		this.metricsTopic = metricsTopic;
 		this.gaugesHost = gaugesHost;
+		this.gaugesPort = gaugesPort;
 		this.gaugesTopic = gaugesTopic;
 	}
 	
 	public BlockingConnection connectToGaugesHost() throws URISyntaxException, Exception {
 		log.info("Connecting to gauges host: " + gaugesHost);
 		MQTT mqtt = new MQTT();
-		mqtt.setHost(gaugesHost, MQTT_PORT);
+		mqtt.setHost(gaugesHost, gaugesPort);
 		BlockingConnection connection = mqtt.blockingConnection();
 		connection.connect();
 		return connection;
@@ -60,7 +65,7 @@ public class MqttConnectionFactory {
 	private BlockingConnection connectToMetricsHost() throws URISyntaxException, Exception {
 		log.info("Connecting to metrics host: " + metricsHost);
 		MQTT mqtt = new MQTT();
-		mqtt.setHost(metricsHost, MQTT_PORT);
+		mqtt.setHost(metricsHost, metricsPort);
 		BlockingConnection connection = mqtt.blockingConnection();
 		connection.connect();
 		return connection;
