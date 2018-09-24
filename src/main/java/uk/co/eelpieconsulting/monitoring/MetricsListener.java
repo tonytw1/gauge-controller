@@ -62,9 +62,18 @@ public class MetricsListener {
 	        	String metricMessage = new String(payload, "UTF-8");
 	        	log.debug("Got metric message: " + metricMessage);
 	        	String[] fields = metricMessage.split(":");
-	        	String lastValue = fields[1];
-	        	MetricType type = lastValue.equals("true") || lastValue.equals("false") ? MetricType.BOOLEAN : MetricType.NUMBER;
-				Metric metric = new Metric(fields[0], type, lastValue, DateTime.now());
+	        	String newValue = fields[1];
+	        	MetricType type = newValue.equals("true") || newValue.equals("false") ? MetricType.BOOLEAN : MetricType.NUMBER;
+
+				String metricName = fields[0];
+				Metric existing = metricsDAO.getByName(metricName);
+
+				String existingValue = existing != null ? existing.getLastValue(): null;
+
+				boolean hasChanged = !(newValue.equals(existingValue));
+				DateTime lastChanged = hasChanged ? DateTime.now() : existing != null ? existing.getLastChanged() : null;
+
+				Metric metric = new Metric(metricName, type, newValue, DateTime.now(), lastChanged);
 	        	metricsDAO.registerMetric(metric);
 	        	
 	        	final boolean isRoutedMetric = routingDAO.isRoutedMetric(metric);

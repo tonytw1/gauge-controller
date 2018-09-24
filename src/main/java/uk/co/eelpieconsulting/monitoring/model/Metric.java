@@ -7,13 +7,15 @@ public class Metric implements Comparable {
 	private final String name, lastValue;
 	private final MetricType type;
 	private final DateTime date;
+	private final DateTime lastChanged;
 	
-	public Metric(String name, MetricType type, String lastValue, DateTime date) {
+	public Metric(String name, MetricType type, String lastValue, DateTime date, DateTime lastChanged) {
 		super();
 		this.name = name;
 		this.type = type;
 		this.lastValue = lastValue;
 		this.date = date;
+		this.lastChanged = lastChanged;
 	}
 
 	public String getName() {
@@ -32,10 +34,19 @@ public class Metric implements Comparable {
 		return date;
 	}
 
+	public DateTime getLastChanged() {
+		return lastChanged;
+	}
+
 	@Override
 	public String toString() {
-		return "Metric [name=" + name + ", lastValue=" + lastValue + ", type="
-				+ type + ", date=" + date + "]";
+		return "Metric{" +
+				"name='" + name + '\'' +
+				", lastValue='" + lastValue + '\'' +
+				", type=" + type +
+				", date=" + date +
+				", lastChanged=" + lastChanged +
+				'}';
 	}
 
 	@Override

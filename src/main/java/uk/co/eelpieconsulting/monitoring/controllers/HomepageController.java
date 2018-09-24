@@ -51,7 +51,7 @@ public class HomepageController {
 
     if (Strings.isNullOrEmpty(metric)) {
       routingDAO.clearRouting(gauge);
-      final Metric nullMetric = new Metric(null, null, "0", DateTime.now());
+      final Metric nullMetric = new Metric(null, null, "0", DateTime.now(), null);
       metricPublisher.publishOntoGaugesChannel(gauge, nullMetric, TransformsDAO.AS_STRING);
       return new ModelAndView(new RedirectView("/"));
     }

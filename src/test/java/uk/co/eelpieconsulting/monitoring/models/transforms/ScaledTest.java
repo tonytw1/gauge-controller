@@ -12,7 +12,7 @@ public class ScaledTest {
 
     @Test
     public void shouldPassThroughUnscaledNumbers() {
-        Metric metric = new Metric("test", MetricType.NUMBER, "23173", DateTime.now());
+        Metric metric = new Metric("test", MetricType.NUMBER, "23173", DateTime.now(), null);
 
         String scaled = new Scaled(1).transform(metric);
 
@@ -21,7 +21,7 @@ public class ScaledTest {
 
     @Test
     public void scaledValuesShouldBeCorrectlyRounded() {
-        Metric metric = new Metric("test", MetricType.NUMBER, "23173", DateTime.now());
+        Metric metric = new Metric("test", MetricType.NUMBER, "23173", DateTime.now(), null);
 
         String scaled = new Scaled(0.01).transform(metric);
 
@@ -30,7 +30,7 @@ public class ScaledTest {
 
     @Test
     public void upScaledValuesShouldBeCorrectlyRounded() {
-        Metric metric = new Metric("test", MetricType.NUMBER, "-23173", DateTime.now());
+        Metric metric = new Metric("test", MetricType.NUMBER, "-23173", DateTime.now(), null);
 
         String scaled = new Scaled(10).transform(metric);
 
