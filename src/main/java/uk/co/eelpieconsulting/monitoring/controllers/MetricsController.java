@@ -45,7 +45,7 @@ public class MetricsController {
     for (Metric m : metrics) {
       try {
         Double.parseDouble(m.getLastValue());
-        cleaned.add(new Metric(makeSafeName(m), m.getType(), m.getLastValue(), m.getDate(), null));
+        cleaned.add(new Metric(makeSafeName(m), m.getType(), m.getLastValue(), m.getDate(), Lists.newArrayList()));
       } catch (Exception e) {
         // TODO
       }
@@ -66,7 +66,7 @@ public class MetricsController {
           Transform transform = transformsDAO.transformByName(route.getTransform().getName());
           String value = transform.transform(metric);
           Double.parseDouble(value);
-          cleaned.add(new Metric(makeSafeName(metric) + "transformed", metric.getType(), value, metric.getDate(), null));
+          cleaned.add(new Metric(makeSafeName(metric) + "transformed", metric.getType(), value, metric.getDate(), Lists.newArrayList()));
         }
       }
     }

@@ -24,7 +24,8 @@ public class TransformsDAO {
           new Scaled(1000.0),
           new FromBoolean(),
           new FromInvertedBoolean(),
-          new FromHex()
+          new FromHex(),
+          new LastChanged()
   );
 
   public Transform transformByName(String transformName) {

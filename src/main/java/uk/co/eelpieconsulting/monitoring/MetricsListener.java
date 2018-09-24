@@ -1,5 +1,6 @@
 package uk.co.eelpieconsulting.monitoring;
 
+import com.google.common.collect.Lists;
 import org.apache.log4j.Logger;
 import org.fusesource.mqtt.client.BlockingConnection;
 import org.fusesource.mqtt.client.Message;
@@ -10,6 +11,8 @@ import org.springframework.stereotype.Component;
 import uk.co.eelpieconsulting.monitoring.model.Metric;
 import uk.co.eelpieconsulting.monitoring.model.MetricRouting;
 import uk.co.eelpieconsulting.monitoring.model.MetricType;
+
+import java.util.List;
 
 @Component
 public class MetricsListener {
@@ -71,9 +74,16 @@ public class MetricsListener {
 				String existingValue = existing != null ? existing.getLastValue(): null;
 
 				boolean hasChanged = !(newValue.equals(existingValue));
-				DateTime lastChanged = hasChanged ? DateTime.now() : existing != null ? existing.getLastChanged() : null;
 
-				Metric metric = new Metric(metricName, type, newValue, DateTime.now(), lastChanged);
+				List<DateTime> changes = existing != null ? existing.getChanges() : Lists.newArrayList();
+				if (hasChanged) {
+					changes.add(DateTime.now());
+				}
+				if (changes.size() > 2) {
+					changes.remove(0);
+				}
+
+				Metric metric = new Metric(metricName, type, newValue, DateTime.now(), changes);
 	        	metricsDAO.registerMetric(metric);
 	        	
 	        	final boolean isRoutedMetric = routingDAO.isRoutedMetric(metric);
