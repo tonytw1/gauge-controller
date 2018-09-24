@@ -66,7 +66,7 @@ public class MetricsController {
           Transform transform = transformsDAO.transformByName(route.getTransform().getName());
           String value = transform.transform(metric);
           Double.parseDouble(value);
-          cleaned.add(new Metric(makeSafeName(metric), metric.getType(), value, metric.getDate()));
+          cleaned.add(new Metric(makeSafeName(metric) + "transformed", metric.getType(), value, metric.getDate()));
         }
       }
     }
