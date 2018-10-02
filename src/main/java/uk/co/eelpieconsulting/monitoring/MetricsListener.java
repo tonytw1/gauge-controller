@@ -64,7 +64,7 @@ public class MetricsListener {
 	        			        	
 	        	String metricMessage = new String(payload, "UTF-8");
 	        	log.debug("Got metric message: " + metricMessage);
-	        	String[] fields = metricMessage.split(":");
+	        	String[] fields = metricMessage.replaceAll("\r", "").replaceAll("\n", "").split(":");
 	        	String newValue = fields[1];
 	        	MetricType type = newValue.equals("true") || newValue.equals("false") ? MetricType.BOOLEAN : MetricType.NUMBER;
 
