@@ -12,10 +12,6 @@
 		<artifactId>spring-boot-starter-parent</artifactId>
 		<version>1.1.7.RELEASE</version>
 	</parent>
-	
-	<properties>
-		<org.springframework.version>3.2.2.RELEASE</org.springframework.version>
-	</properties>
 
 	<repositories>
 		<repository>
@@ -29,34 +25,8 @@
 				<enabled>false</enabled>
 			</releases>
 		</repository>
-		
-		<repository>
-			<id>spring-snapshots</id>
-			<url>http://repo.spring.io/snapshot</url>
-			<snapshots>
-				<enabled>true</enabled>
-			</snapshots>
-		</repository>
-		<repository>
-			<id>spring-milestones</id>
-			<url>http://repo.spring.io/milestone</url>
-			<snapshots>
-				<enabled>true</enabled>
-			</snapshots>
-		</repository>
 	</repositories>
 
-   <pluginRepositories>
-        <pluginRepository>
-            <id>spring-snapshots</id>
-            <url>http://repo.spring.io/snapshot</url>
-        </pluginRepository>
-        <pluginRepository>
-            <id>spring-milestones</id>
-            <url>http://repo.spring.io/milestone</url>
-        </pluginRepository>
-    </pluginRepositories>
-    
 	<build>
 		<plugins>
 			<plugin>
@@ -67,11 +37,6 @@
 					<target>1.8</target>
 				</configuration>
 				<version>2.0.2</version>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-war-plugin</artifactId>
-				<version>2.1</version>
 			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
@@ -105,7 +70,7 @@
 		<dependency>
 			<groupId>org.fusesource.mqtt-client</groupId>
 			<artifactId>mqtt-client</artifactId>
-			<version>1.6-SNAPSHOT</version>
+			<version>1.7</version>
 		</dependency>
 
 		<dependency>
@@ -131,7 +96,9 @@
 		<dependency>
 			<groupId>org.apache.velocity</groupId>
 			<artifactId>velocity</artifactId>
+			<version>1.7</version>
 		</dependency>
+
 		<dependency>
 			<groupId>joda-time</groupId>
 			<artifactId>joda-time</artifactId>
