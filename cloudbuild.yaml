@@ -3,6 +3,6 @@ steps:
   entrypoint: 'mvn'
   args: ['test', 'install']
 - name: 'gcr.io/cloud-builders/docker'
-  args: ['build', '-t', 'gcr.io/$PROJECT_ID/gauge-controller', '.']
+  args: ['build', '-t', 'eu.gcr.io/$PROJECT_ID/gauge-controller', '.']
 - name: 'gcr.io/cloud-builders/docker'
-  args: ['push', 'gcr.io/$PROJECT_ID/gauge-controller']
+  args: ['push', 'eu.gcr.io/$PROJECT_ID/gauge-controller']
