@@ -37,23 +37,6 @@ public class MetricsController {
     return new ModelAndView("templates/browse").addObject("availableMetrics", metricsDAO.getMetrics());
   }
 
-  @RequestMapping(value = "/metrics", method = RequestMethod.GET)
-  public ModelAndView metrics() {
-    List<Metric> metrics = metricsDAO.getMetrics();
-
-    List<Metric> cleaned = Lists.newArrayList();
-    for (Metric m : metrics) {
-      try {
-        Double.parseDouble(m.getLastValue());
-        cleaned.add(new Metric(makeSafeName(m), m.getType(), m.getLastValue(), m.getDate(), Lists.newArrayList()));
-      } catch (Exception e) {
-        // TODO
-      }
-    }
-
-    return new ModelAndView("templates/export").addObject("availableMetrics", cleaned);
-  }
-
   @RequestMapping(value = "/transformed", method = RequestMethod.GET)
   public ModelAndView routed() {
 
