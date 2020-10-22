@@ -11,7 +11,7 @@ public class InvertedBooleanInt implements Transform {
   @Override
   public String transform(Metric metric) {
     int i = Integer.parseInt(metric.getLastValue());
-    return Boolean.toString(i == 0 ? true : false);
+    return Boolean.toString(i == 0);
   }
   
 }
