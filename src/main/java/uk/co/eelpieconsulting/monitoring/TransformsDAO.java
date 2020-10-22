@@ -25,6 +25,7 @@ public class TransformsDAO {
           new Scaled(10000.0),
           new FromBoolean(),
           new FromInvertedBoolean(),
+          new InvertedBooleanInt(),
           new FromHex(),
           new LastChanged()
   );
