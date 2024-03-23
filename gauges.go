@@ -124,12 +124,15 @@ func main() {
 	}
 
 	getRoutes := func(w http.ResponseWriter, r *http.Request) {
-		routesMap := make(map[string]interface{})
+		var routes []model.Route
 		routingTable.Range(func(k, v interface{}) bool {
-			routesMap[k.(string)] = v
+			routes = append(routes, v.(model.Route))
 			return true
 		})
-		asJson, _ := json.Marshal(routesMap)
+		sort.Slice(routes, func(i, j int) bool {
+			return strings.Compare(routes[i].FromMetric, routes[j].FromMetric) < 0
+		})
+		asJson, _ := json.Marshal(routes)
 
 		w.Header().Set("Access-Control-Allow-Origin", "*")
 		io.WriteString(w, string(asJson))
@@ -149,7 +152,8 @@ func main() {
 		}
 
 		routingTable.Store(rr.Metric, model.Route{
-			ToGauge: rr.Gauge,
+			FromMetric: rr.Metric,
+			ToGauge:    rr.Gauge,
 		})
 
 		w.Header().Set("Access-Control-Allow-Origin", "*")
