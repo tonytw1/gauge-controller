@@ -43,7 +43,7 @@ func main() {
 		name := split[0]
 		value := split[1]
 		metric := model.Metric{Name: name, Value: value}
-		metrics.Store(payload, metric)
+		metrics.Store(name, metric)
 
 		// Route metrics
 		load, ok := routingTable.Load(metric.Name)
