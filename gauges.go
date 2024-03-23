@@ -94,7 +94,7 @@ func main() {
 	}
 
 	getGauges := func(w http.ResponseWriter, r *http.Request) {
-		var gs []model.Gauge
+		var gs = make([]model.Gauge, 0)
 		gauges.Range(func(k, v interface{}) bool {
 			gs = append(gs, v.(model.Gauge))
 			return true
@@ -109,7 +109,7 @@ func main() {
 	}
 
 	getMetrics := func(w http.ResponseWriter, r *http.Request) {
-		var ms []model.Metric
+		var ms = make([]model.Metric, 0)
 		metrics.Range(func(k, v interface{}) bool {
 			ms = append(ms, v.(model.Metric))
 			return true
@@ -124,7 +124,7 @@ func main() {
 	}
 
 	getRoutes := func(w http.ResponseWriter, r *http.Request) {
-		var routes []model.Route
+		var routes = make([]model.Route, 0)
 		routingTable.Range(func(k, v interface{}) bool {
 			routes = append(routes, v.(model.Route))
 			return true
