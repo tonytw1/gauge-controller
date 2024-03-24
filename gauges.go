@@ -145,13 +145,16 @@ func main() {
 
 	optionsRoutes := func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Access-Control-Allow-Origin", "*")
+		io.WriteString(w, string("ok"))
 	}
 
 	postRoutes := func(w http.ResponseWriter, r *http.Request) {
+		log.Print("Got POST")
 		decoder := json.NewDecoder(r.Body)
 		var rr routeRequest
 		err := decoder.Decode(&rr)
 		if err != nil {
+			log.Print("Decode error", err)
 			panic(err)
 		}
 
@@ -160,7 +163,7 @@ func main() {
 			ToGauge:    rr.Gauge,
 		})
 
-		w.Header().Set("Access-Control-Allow-Origin", "*")
+		w.Header().Set("Access-Control-Allow-Origin", "*") // Not needed
 		io.WriteString(w, string("ok"))
 	}
 
