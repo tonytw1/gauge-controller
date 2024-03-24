@@ -135,6 +135,7 @@ func main() {
 		asJson, _ := json.Marshal(routes)
 
 		w.Header().Set("Access-Control-Allow-Origin", "*")
+		w.Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS")
 		io.WriteString(w, string(asJson))
 	}
 
@@ -145,6 +146,7 @@ func main() {
 
 	optionsRoutes := func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Access-Control-Allow-Origin", "*")
+		w.Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS")
 		io.WriteString(w, string("ok"))
 	}
 
@@ -163,7 +165,6 @@ func main() {
 			ToGauge:    rr.Gauge,
 		})
 
-		w.Header().Set("Access-Control-Allow-Origin", "*") // Not needed
 		io.WriteString(w, string("ok"))
 	}
 
