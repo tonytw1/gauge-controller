@@ -143,6 +143,10 @@ func main() {
 		Gauge  string
 	}
 
+	optionsRoutes := func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Access-Control-Allow-Origin", "*")
+	}
+
 	postRoutes := func(w http.ResponseWriter, r *http.Request) {
 		decoder := json.NewDecoder(r.Body)
 		var rr routeRequest
@@ -166,6 +170,7 @@ func main() {
 	r.HandleFunc("/gauges", getGauges)
 	r.HandleFunc("/metrics", getMetrics)
 	r.HandleFunc("/routes", getRoutes).Methods("GET")
+	r.HandleFunc("/routes", optionsRoutes).Methods("OPTIONS")
 	r.HandleFunc("/routes", postRoutes).Methods("POST")
 	http.Handle("/", r)
 	err = http.ListenAndServe(":8080", nil)
