@@ -124,15 +124,7 @@ func main() {
 	}
 
 	getRoutes := func(w http.ResponseWriter, r *http.Request) {
-		var routes = make([]model.Route, 0)
-		routingTable.Range(func(k, v interface{}) bool {
-			routes = append(routes, v.(model.Route))
-			return true
-		})
-		sort.Slice(routes, func(i, j int) bool {
-			return strings.Compare(routes[i].FromMetric, routes[j].FromMetric) < 0
-		})
-		asJson, _ := json.Marshal(routes)
+		asJson := routesAsJson(routingTable)
 
 		w.Header().Set("Access-Control-Allow-Origin", "*")
 		w.Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS")
@@ -165,9 +157,10 @@ func main() {
 			ToGauge:    rr.Gauge,
 		})
 
+		asJson := routesAsJson(routingTable)
 		w.Header().Set("Access-Control-Allow-Origin", "*")
 		w.Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS")
-		io.WriteString(w, string("ok"))
+		io.WriteString(w, string(asJson))
 	}
 
 	log.Print("Starting HTTP server")
@@ -184,6 +177,19 @@ func main() {
 		log.Print(err)
 	}
 	log.Print("Done")
+}
+
+func routesAsJson(routingTable sync.Map) []byte {
+	var routes = make([]model.Route, 0)
+	routingTable.Range(func(k, v interface{}) bool {
+		routes = append(routes, v.(model.Route))
+		return true
+	})
+	sort.Slice(routes, func(i, j int) bool {
+		return strings.Compare(routes[i].FromMetric, routes[j].FromMetric) < 0
+	})
+	asJson, _ := json.Marshal(routes)
+	return asJson
 }
 
 func setupMqttClient(mqttURL string, clientId string, metricsTopic string, metricsHandler mqtt.MessageHandler,
