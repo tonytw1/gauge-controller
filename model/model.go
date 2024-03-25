@@ -11,6 +11,7 @@ type Gauge struct {
 }
 
 type Route struct {
+	Id         string
 	FromMetric string
 	ToGauge    string
 }

@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	mqtt "github.com/eclipse/paho.mqtt.golang"
+	"github.com/google/uuid"
 	"github.com/gorilla/mux"
 	"github.com/tkanos/gonfig"
 	"github.com/tonytw1/gauges/model"
@@ -153,6 +154,7 @@ func main() {
 		}
 
 		routingTable.Store(rr.Metric, model.Route{
+			Id:         uuid.New().String(),
 			FromMetric: rr.Metric,
 			ToGauge:    rr.Gauge,
 		})
