@@ -165,6 +165,8 @@ func main() {
 			ToGauge:    rr.Gauge,
 		})
 
+		w.Header().Set("Access-Control-Allow-Origin", "*")
+		w.Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS")
 		io.WriteString(w, string("ok"))
 	}
 
