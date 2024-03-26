@@ -163,7 +163,6 @@ func main() {
 	}
 
 	postRoutes := func(w http.ResponseWriter, r *http.Request) {
-		log.Print("Got POST")
 		decoder := json.NewDecoder(r.Body)
 		var rr routeRequest
 		err := decoder.Decode(&rr)
@@ -172,8 +171,9 @@ func main() {
 			panic(err)
 		}
 
-		routingTable.Store(rr.Metric, model.Route{
-			Id:         uuid.New().String(),
+		id := uuid.New().String()
+		routingTable.Store(id, model.Route{
+			Id:         id,
 			FromMetric: rr.Metric,
 			ToGauge:    rr.Gauge,
 		})
