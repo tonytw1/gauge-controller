@@ -174,9 +174,10 @@ func main() {
 		routes.Delete(route.(model.Route).Id)
 		routingTable.Delete(route.(model.Route).FromMetric)
 
+		asJson := routesAsJson(routes)
 		w.Header().Set("Access-Control-Allow-Origin", "*")
 		w.Header().Set("Access-Control-Allow-Methods", "POST, DELETE, GET, OPTIONS")
-		io.WriteString(w, "ok")
+		io.WriteString(w, string(asJson))
 	}
 
 	type routeRequest struct {
