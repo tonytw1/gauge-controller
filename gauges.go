@@ -132,6 +132,25 @@ func main() {
 		io.WriteString(w, string(asJson))
 	}
 
+	getRoute := func(w http.ResponseWriter, r *http.Request) {
+		vars := mux.Vars(r)
+		id := vars["id"] // TODO null check
+		route, ok := routingTable.Load(id)
+		if !ok {
+			http.Error(w, "Not found", http.StatusNotFound)
+			return
+		}
+
+		asJson, err := json.Marshal(route)
+		if err != nil {
+			http.Error(w, "Error", http.StatusInternalServerError)
+		}
+
+		w.Header().Set("Access-Control-Allow-Origin", "*")
+		w.Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS")
+		io.WriteString(w, string(asJson))
+	}
+
 	type routeRequest struct {
 		Metric string
 		Gauge  string
@@ -171,6 +190,7 @@ func main() {
 	r.HandleFunc("/gauges", getGauges)
 	r.HandleFunc("/metrics", getMetrics)
 	r.HandleFunc("/routes", getRoutes).Methods("GET")
+	r.HandleFunc("/routes/{id}", getRoute).Methods("GET")
 	r.HandleFunc("/routes", optionsRoutes).Methods("OPTIONS")
 	r.HandleFunc("/routes", postRoutes).Methods("POST")
 	http.Handle("/", r)
