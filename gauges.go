@@ -28,6 +28,7 @@ func main() {
 		panic(err)
 	}
 
+	var routes = sync.Map{}
 	var routingTable = sync.Map{}
 
 	var metrics = sync.Map{}
@@ -135,7 +136,7 @@ func main() {
 	getRoute := func(w http.ResponseWriter, r *http.Request) {
 		vars := mux.Vars(r)
 		id := vars["id"] // TODO null check
-		route, ok := routingTable.Load(id)
+		route, ok := routes.Load(id)
 		if !ok {
 			http.Error(w, "Not found", http.StatusNotFound)
 			return
@@ -159,7 +160,7 @@ func main() {
 	optionsRoutes := func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Access-Control-Allow-Origin", "*")
 		w.Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS")
-		io.WriteString(w, string("ok"))
+		io.WriteString(w, "ok")
 	}
 
 	postRoutes := func(w http.ResponseWriter, r *http.Request) {
@@ -172,13 +173,15 @@ func main() {
 		}
 
 		id := uuid.New().String()
-		routingTable.Store(id, model.Route{
+		route := model.Route{
 			Id:         id,
 			FromMetric: rr.Metric,
 			ToGauge:    rr.Gauge,
-		})
+		}
+		routes.Store(id, route)
+		routingTable.Store(rr.Metric, route)
 
-		asJson := routesAsJson(routingTable)
+		asJson := routesAsJson(routes)
 		w.Header().Set("Access-Control-Allow-Origin", "*")
 		w.Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS")
 		io.WriteString(w, string(asJson))
