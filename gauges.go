@@ -152,6 +152,27 @@ func main() {
 		io.WriteString(w, string(asJson))
 	}
 
+	deleteRoute := func(w http.ResponseWriter, r *http.Request) {
+		vars := mux.Vars(r)
+		id := vars["id"] // TODO null check
+		route, ok := routes.Load(id)
+		if !ok {
+			http.Error(w, "Not found", http.StatusNotFound)
+			return
+		}
+
+		if err != nil {
+			http.Error(w, "Error", http.StatusInternalServerError)
+		}
+
+		routes.Delete(route.(model.Route).Id)
+		routingTable.Delete(route.(model.Route).FromMetric)
+
+		w.Header().Set("Access-Control-Allow-Origin", "*")
+		w.Header().Set("Access-Control-Allow-Methods", "POST, DELETE, GET, OPTIONS")
+		io.WriteString(w, "ok")
+	}
+
 	type routeRequest struct {
 		Metric string
 		Gauge  string
@@ -159,7 +180,7 @@ func main() {
 
 	optionsRoutes := func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Access-Control-Allow-Origin", "*")
-		w.Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS")
+		w.Header().Set("Access-Control-Allow-Methods", "POST, DELETE, GET, OPTIONS")
 		io.WriteString(w, "ok")
 	}
 
@@ -183,7 +204,7 @@ func main() {
 
 		asJson := routesAsJson(routes)
 		w.Header().Set("Access-Control-Allow-Origin", "*")
-		w.Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS")
+		w.Header().Set("Access-Control-Allow-Methods", "POST, DELETE, GET, OPTIONS")
 		io.WriteString(w, string(asJson))
 	}
 
@@ -194,6 +215,7 @@ func main() {
 	r.HandleFunc("/metrics", getMetrics)
 	r.HandleFunc("/routes", getRoutes).Methods("GET")
 	r.HandleFunc("/routes/{id}", getRoute).Methods("GET")
+	r.HandleFunc("/routes/{id}", deleteRoute).Methods("DELETE")
 	r.HandleFunc("/routes", optionsRoutes).Methods("OPTIONS")
 	r.HandleFunc("/routes", postRoutes).Methods("POST")
 	http.Handle("/", r)
