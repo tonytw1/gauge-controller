@@ -152,6 +152,12 @@ func main() {
 		io.WriteString(w, string(asJson))
 	}
 
+	optionsRoute := func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Access-Control-Allow-Origin", "*")
+		w.Header().Set("Access-Control-Allow-Methods", "POST, DELETE, GET, OPTIONS")
+		io.WriteString(w, "ok")
+	}
+
 	deleteRoute := func(w http.ResponseWriter, r *http.Request) {
 		vars := mux.Vars(r)
 		id := vars["id"] // TODO null check
@@ -215,6 +221,7 @@ func main() {
 	r.HandleFunc("/metrics", getMetrics)
 	r.HandleFunc("/routes", getRoutes).Methods("GET")
 	r.HandleFunc("/routes/{id}", getRoute).Methods("GET")
+	r.HandleFunc("/routes/{id}", optionsRoute).Methods("OPTIONS")
 	r.HandleFunc("/routes/{id}", deleteRoute).Methods("DELETE")
 	r.HandleFunc("/routes", optionsRoutes).Methods("OPTIONS")
 	r.HandleFunc("/routes", postRoutes).Methods("POST")
