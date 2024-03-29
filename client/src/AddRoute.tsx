@@ -3,7 +3,7 @@ import {GaugesDropdown} from "./GaugesDropdown.tsx";
 
 export function AddRoute({updateRoutes}) {
 
-    function handleSubmit(e) {
+    function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
         // Prevent the browser from reloading the page
         e.preventDefault();
 
@@ -20,9 +20,11 @@ export function AddRoute({updateRoutes}) {
         }
 
         fetch('http://10.0.46.10:32100/routes', requestOptions)
-            .then((response) => response.json())
+            .then((response) => response.text())
             .then((responseJson) => {
-                updateRoutes(responseJson);
+                const routes = JSON.parse(responseJson);
+                console.log("Routes: " + routes);
+                updateRoutes(routes);
             })
             .catch((error) => {
                 console.error(error);

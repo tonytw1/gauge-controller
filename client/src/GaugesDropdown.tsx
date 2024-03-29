@@ -1,35 +1,38 @@
-import { useEffect, useState } from 'react';
+import {useEffect, useState} from 'react';
 
 export function GaugesDropdown() {
 
-    const [gauges, setGauges] = useState([]);
+    const [gauges, setGauges] = useState<Gauge[]>([]);
 
     function getGaugesAsync() {
-       return fetch('http://10.0.46.10:32100/gauges')
-       .then((response) => response.json())
-       .then((responseJson) => {
-        setGauges(responseJson);
-       })
-       .catch((error) => {
-         console.error(error);
-       });
+        return fetch('http://10.0.46.10:32100/gauges')
+            .then((response) => response.text())
+            .then((responseJson) => {
+                const gauges = JSON.parse(responseJson);
+                setGauges(gauges);
+            })
+            .catch((error) => {
+                console.error(error);
+            });
     }
 
-    useEffect(() => getGaugesAsync, []);
+    useEffect(() => {
+        getGaugesAsync()
+    }, []);
 
-    function GaugeOption({row}) {
+    function GaugeOption({gauge}: { gauge: Gauge }) {
         return (
             <>
-                <option value={row.Name}>{row.Name}</option>
+                <option value={gauge.Name}>{gauge.Name}</option>
             </>
         )
     };
 
-    const listItems = gauges.map(row => <GaugeOption row={row}/> );
+    const listItems = gauges.map(gauge => <GaugeOption gauge={gauge}/>);
 
     return (
         <>
-        <select name="Gauge">{listItems}</select>
+            <select name="Gauge">{listItems}</select>
         </>
     )
 }

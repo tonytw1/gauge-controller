@@ -1,18 +1,17 @@
-import { useEffect, useState } from 'react';
+export function Routes({routes, updateRoutes} : {routes: Route[], updateRoutes:any}) {
 
-export function Routes({routes, updateRoutes}) {
+    function DeleteRoute({route} : {route:Route}) {
 
-    function DeleteRoute({row}) {
-
-        function handleDeleteRoute(e) {
+        function handleDeleteRoute(e: React.FormEvent<HTMLButtonElement>) {
             e.preventDefault();
             const requestOptions = {
                 method: 'DELETE',
             }
-            return fetch('http://10.0.46.10:32100/routes/' + row.Id, requestOptions)
-                .then((response) => response.json())
+            return fetch('http://10.0.46.10:32100/routes/' + route.Id, requestOptions)
+                .then((response) => response.text())
                 .then((responseJson) => {
-                    updateRoutes(responseJson);
+                    routes = JSON.parse(responseJson);
+                    updateRoutes(routes);
                 })
                 .catch((error) => {
                     console.error(error);
@@ -24,15 +23,18 @@ export function Routes({routes, updateRoutes}) {
         )
     }
 
-    function Route({row}) {
+    function RouteRow({route} : {route:Route}) {
         return (
             <>
-                <h4>{row.FromMetric} to {row.ToGauge} - <DeleteRoute row={row} /></h4>
+                <h4>{route.FromMetric} to {route.ToGauge} - <DeleteRoute route={route} /></h4>
             </>
         )
     };
 
-    const listItems = routes.map(row => <li key={row.Id}><Route row={row} /></li>);
+    console.log("MEH: " + routes);
+    const listItems = routes.map(route =>
+        <li key={route.Id}><RouteRow route={route} /></li>
+    );
 
     return (
         <>
