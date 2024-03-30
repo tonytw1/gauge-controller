@@ -7,7 +7,7 @@ function App() {
 
     const [routes, setRoutes] = useState<Route[]>(new Array<Route>());
 
-    function updateRoutes(routes: Route[]) {
+    function updateRoutes(routes: Route[]): void {
         setRoutes(routes)
     };
 

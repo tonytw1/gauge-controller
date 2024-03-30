@@ -2,7 +2,7 @@ import {MetricsDropdown} from "./MetricsDropdown.tsx";
 import {GaugesDropdown} from "./GaugesDropdown.tsx";
 import React from "react";
 
-export function AddRoute({updateRoutes = () => {}}) {
+export function AddRoute({updateRoutes} : {updateRoutes: (routes: Route[]) => void}) {
 
     function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
         // Prevent the browser from reloading the page
