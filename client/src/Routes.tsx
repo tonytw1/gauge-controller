@@ -31,7 +31,6 @@ export function Routes({routes, updateRoutes} : {routes: Route[], updateRoutes:a
         )
     };
 
-    console.log("MEH: " + routes);
     const listItems = routes.map(route =>
         <li key={route.Id}><RouteRow route={route} /></li>
     );

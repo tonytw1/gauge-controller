@@ -12,8 +12,6 @@ export function AddRoute({updateRoutes} : {updateRoutes: (routes: Route[]) => vo
         const formData = new FormData(form);
         const formJson = Object.fromEntries(formData.entries());
 
-        formJson['Gauge'] = 'Meh';
-
         const requestOptions = {
             method: 'POST',
             //headers: { 'Content-Type': 'application/json' },
