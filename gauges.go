@@ -2,7 +2,6 @@ package main
 
 import (
 	"encoding/json"
-	"fmt"
 	mqtt "github.com/eclipse/paho.mqtt.golang"
 	"github.com/google/uuid"
 	"github.com/gorilla/mux"
@@ -77,23 +76,6 @@ func main() {
 		"gauges", gaugesMessageHandler)
 
 	defer mqttClient.Disconnect(250)
-
-	getHomepage := func(w http.ResponseWriter, r *http.Request) {
-		var gaugesCount = 0
-		gauges.Range(func(k, v interface{}) bool {
-			gaugesCount++
-			return true
-		})
-		var metricsCount = 0
-		metrics.Range(func(k, v interface{}) bool {
-			metricsCount++
-			return true
-		})
-
-		output := "Gauges: " + fmt.Sprint(gaugesCount)
-		output += "Metrics: " + fmt.Sprint(metricsCount)
-		io.WriteString(w, output)
-	}
 
 	getGauges := func(w http.ResponseWriter, r *http.Request) {
 		var gs = make([]model.Gauge, 0)
@@ -217,7 +199,7 @@ func main() {
 
 	log.Print("Starting HTTP server")
 	r := mux.NewRouter()
-	r.HandleFunc("/", getHomepage)
+	r.PathPrefix("/").Handler(http.FileServer(http.Dir("client/dist")))
 	r.HandleFunc("/gauges", getGauges)
 	r.HandleFunc("/metrics", getMetrics)
 	r.HandleFunc("/routes", getRoutes).Methods("GET")
