@@ -51,7 +51,8 @@ func main() {
 		if ok {
 			route := load.(model.Route)
 			log.Print("Routing " + metric.Name + " to " + route.ToGauge)
-			publish(client, "gauges", payload)
+			gaugesMessage := load.(model.Route).ToGauge + ":" + value
+			publish(client, "gauges", gaugesMessage)
 		}
 	}
 
