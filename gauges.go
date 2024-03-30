@@ -199,7 +199,6 @@ func main() {
 
 	log.Print("Starting HTTP server")
 	r := mux.NewRouter()
-	r.PathPrefix("/").Handler(http.FileServer(http.Dir("client/dist")))
 	r.HandleFunc("/gauges", getGauges)
 	r.HandleFunc("/metrics", getMetrics)
 	r.HandleFunc("/routes", getRoutes).Methods("GET")
@@ -208,6 +207,8 @@ func main() {
 	r.HandleFunc("/routes/{id}", deleteRoute).Methods("DELETE")
 	r.HandleFunc("/routes", optionsRoutes).Methods("OPTIONS")
 	r.HandleFunc("/routes", postRoutes).Methods("POST")
+	r.PathPrefix("/").Handler(http.FileServer(http.Dir("client/dist")))
+
 	http.Handle("/", r)
 	err = http.ListenAndServe(":8080", nil)
 	if err != nil {
