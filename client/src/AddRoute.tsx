@@ -1,13 +1,14 @@
 import {MetricsDropdown} from "./MetricsDropdown.tsx";
 import {GaugesDropdown} from "./GaugesDropdown.tsx";
+import React from "react";
 
-export function AddRoute({updateRoutes}) {
+export function AddRoute({updateRoutes = () => {}}) {
 
     function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
         // Prevent the browser from reloading the page
         e.preventDefault();
 
-        const form = e.target;
+        const form = e.currentTarget;
         const formData = new FormData(form);
         const formJson = Object.fromEntries(formData.entries());
 
