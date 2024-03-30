@@ -64,8 +64,16 @@ func main() {
 			log.Print("Rejected malformed gauges message: '" + payload + "'")
 			return
 		}
-		name := split[0]
-		value := split[1]
+		description := split[1]
+		fields := strings.Split(description, "[")
+		if len(fields) != 2 {
+			log.Print("Rejected malformed gauges message: '" + payload + "'")
+			return
+		}
+
+		name := fields[0]
+		value := strings.TrimSuffix(fields[1], "]")
+
 		gauge := model.Gauge{Name: name, MaxValue: value}
 		gauges.Store(name, gauge)
 	}
