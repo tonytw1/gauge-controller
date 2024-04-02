@@ -97,7 +97,7 @@ func main() {
 		})
 		asJson, _ := json.Marshal(gs)
 
-		w.Header().Set("Access-Control-Allow-Origin", "*")
+		setCORSHeadersOn(w)
 		io.WriteString(w, string(asJson))
 	}
 
@@ -112,15 +112,14 @@ func main() {
 		})
 		asJson, _ := json.Marshal(ms)
 
-		w.Header().Set("Access-Control-Allow-Origin", "*")
+		setCORSHeadersOn(w)
 		io.WriteString(w, string(asJson))
 	}
 
 	getRoutes := func(w http.ResponseWriter, r *http.Request) {
 		asJson := routesAsJson(routingTable)
 
-		w.Header().Set("Access-Control-Allow-Origin", "*")
-		w.Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS")
+		setCORSHeadersOn(w)
 		io.WriteString(w, string(asJson))
 	}
 
@@ -138,14 +137,12 @@ func main() {
 			http.Error(w, "Error", http.StatusInternalServerError)
 		}
 
-		w.Header().Set("Access-Control-Allow-Origin", "*")
-		w.Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS")
+		setCORSHeadersOn(w)
 		io.WriteString(w, string(asJson))
 	}
 
 	optionsRoute := func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Access-Control-Allow-Origin", "*")
-		w.Header().Set("Access-Control-Allow-Methods", "POST, DELETE, GET, OPTIONS")
+		setCORSHeadersOn(w)
 		io.WriteString(w, "ok")
 	}
 
@@ -166,8 +163,7 @@ func main() {
 		routingTable.Delete(route.(model.Route).FromMetric)
 
 		asJson := routesAsJson(routes)
-		w.Header().Set("Access-Control-Allow-Origin", "*")
-		w.Header().Set("Access-Control-Allow-Methods", "POST, DELETE, GET, OPTIONS")
+		setCORSHeadersOn(w)
 		io.WriteString(w, string(asJson))
 	}
 
@@ -177,8 +173,7 @@ func main() {
 	}
 
 	optionsRoutes := func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Access-Control-Allow-Origin", "*")
-		w.Header().Set("Access-Control-Allow-Methods", "POST, DELETE, GET, OPTIONS")
+		setCORSHeadersOn(w)
 		io.WriteString(w, "ok")
 	}
 
@@ -201,8 +196,7 @@ func main() {
 		routingTable.Store(rr.Metric, route)
 
 		asJson := routesAsJson(routes)
-		w.Header().Set("Access-Control-Allow-Origin", "*")
-		w.Header().Set("Access-Control-Allow-Methods", "POST, DELETE, GET, OPTIONS")
+		setCORSHeadersOn(w)
 		io.WriteString(w, string(asJson))
 	}
 
@@ -224,6 +218,11 @@ func main() {
 		log.Print(err)
 	}
 	log.Print("Done")
+}
+
+func setCORSHeadersOn(w http.ResponseWriter) {
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS")
 }
 
 func routesAsJson(routingTable sync.Map) []byte {
