@@ -1,5 +1,6 @@
 import {MetricsDropdown} from "./MetricsDropdown.tsx";
 import {GaugesDropdown} from "./GaugesDropdown.tsx";
+import {TransformsDropdown} from "./TransformsDropdown.tsx";
 import React from "react";
 
 export function AddRoute({updateRoutes} : {updateRoutes: (routes: Route[]) => void}) {
@@ -33,7 +34,7 @@ export function AddRoute({updateRoutes} : {updateRoutes: (routes: Route[]) => vo
     return (
         <form method="post" onSubmit={handleSubmit}>
             <h4>Add route</h4>
-            <MetricsDropdown /> to <GaugesDropdown />
+            <MetricsDropdown /> to <TransformsDropdown /> to <GaugesDropdown />
             <button type="submit">Submit</button>
         </form>
     )

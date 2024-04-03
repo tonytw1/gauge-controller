@@ -13,6 +13,7 @@ type Gauge struct {
 type Route struct {
 	Id         string
 	FromMetric string
+	Transform  string
 	ToGauge    string
 }
 

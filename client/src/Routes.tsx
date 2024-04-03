@@ -26,7 +26,7 @@ export function Routes({routes, updateRoutes} : {routes: Route[], updateRoutes:a
     function RouteRow({route} : {route:Route}) {
         return (
             <>
-                <h4>{route.FromMetric} to {route.ToGauge} - <DeleteRoute route={route} /></h4>
+                <h4>{route.FromMetric} to {route.Transform} to {route.ToGauge} - <DeleteRoute route={route} /></h4>
             </>
         )
     };

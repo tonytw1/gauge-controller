@@ -169,8 +169,9 @@ func main() {
 	}
 
 	type routeRequest struct {
-		Metric string
-		Gauge  string
+		Metric    string
+		Gauge     string
+		Transform string
 	}
 
 	optionsRoutes := func(w http.ResponseWriter, r *http.Request) {
@@ -192,6 +193,7 @@ func main() {
 			Id:         id,
 			FromMetric: rr.Metric,
 			ToGauge:    rr.Gauge,
+			Transform:  rr.Transform, // TODO validate transform
 		}
 		routes.Store(id, route)
 		routingTable.Store(rr.Metric, route)

@@ -1,6 +1,6 @@
 type Gauge = {
-    Name: string;
-    MaxValue: string;
+    Name: string
+    MaxValue: string
 };
 
 type Metric = {
@@ -10,6 +10,11 @@ type Metric = {
 
 type Route = {
     Id: string
-    FromMetric: string;
-    ToGauge: string;
+    FromMetric: string
+    Transform: string
+    ToGauge: string
+};
+
+type Transform = {
+    Name: string
 };
