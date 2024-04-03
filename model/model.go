@@ -15,3 +15,8 @@ type Route struct {
 	FromMetric string
 	ToGauge    string
 }
+
+type Transform struct {
+	Name      string
+	Transform func(string) int
+}

@@ -12,6 +12,7 @@ import (
 	"net/http"
 	"os"
 	"sort"
+	"strconv"
 	"strings"
 	"sync"
 	"time"
@@ -200,6 +201,43 @@ func main() {
 		io.WriteString(w, string(asJson))
 	}
 
+	getTransforms := func(w http.ResponseWriter, r *http.Request) {
+		toInt := func(input string) int {
+			i, err := strconv.Atoi(input)
+			if err != nil {
+				return 0
+			}
+			return i
+		}
+		booleanToInt := func(input string) int {
+			i, err := strconv.ParseBool(input)
+			if err != nil {
+				return 0
+			}
+			if i {
+				return 1
+			} else {
+				return 0
+			}
+		}
+		var transforms []model.Transform
+		transforms = append(transforms, model.Transform{Name: "to int", Transform: toInt})
+		transforms = append(transforms, model.Transform{Name: "boolean to int", Transform: booleanToInt})
+
+		type DisplayTransform struct {
+			Name string
+		}
+
+		var displayTransforms = make([]DisplayTransform, 0)
+		for _, t := range transforms {
+			displayTransforms = append(displayTransforms, DisplayTransform{Name: t.Name})
+		}
+		asJson, _ := json.Marshal(displayTransforms)
+
+		setCORSHeadersOn(w)
+		io.WriteString(w, string(asJson))
+	}
+
 	log.Print("Starting HTTP server")
 	r := mux.NewRouter()
 	r.HandleFunc("/gauges", getGauges)
@@ -210,6 +248,7 @@ func main() {
 	r.HandleFunc("/routes/{id}", deleteRoute).Methods("DELETE")
 	r.HandleFunc("/routes", optionsRoutes).Methods("OPTIONS")
 	r.HandleFunc("/routes", postRoutes).Methods("POST")
+	r.HandleFunc("/transforms", getTransforms).Methods("GET")
 	r.PathPrefix("/").Handler(http.FileServer(http.Dir("client/dist")))
 
 	http.Handle("/", r)
