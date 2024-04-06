@@ -72,12 +72,18 @@ func main() {
 		metrics.Store(name, metric)
 
 		// Route metrics
-		load, ok := routingTable.Load(metric.Name)
+		route, ok := routingTable.Load(metric.Name)
 		if ok {
-			route := load.(model.Route)
+			route := route.(model.Route)
 			log.Print("Routing " + metric.Name + " to " + route.ToGauge)
-			gaugesMessage := load.(model.Route).ToGauge + ":" + value
-			publish(client, "gauges", gaugesMessage)
+			transform, ok := transforms[route.Transform]
+			if ok {
+				transformedValue, err := transform(value)
+				if err != nil {
+					gaugesMessage := route.ToGauge + ":" + strconv.Itoa(transformedValue)
+					publish(client, "gauges", gaugesMessage)
+				}
+			}
 		}
 	}
 
