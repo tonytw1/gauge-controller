@@ -19,5 +19,5 @@ type Route struct {
 
 type Transform struct {
 	Name      string
-	Transform func(string) int
+	Transform func(string) (int, error)
 }

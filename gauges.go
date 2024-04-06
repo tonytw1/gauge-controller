@@ -32,6 +32,30 @@ func main() {
 	var routingTable = sync.Map{}
 
 	var metrics = sync.Map{}
+
+	toInt := func(input string) (int, error) {
+		i, err := strconv.Atoi(input)
+		if err != nil {
+			return 0, err
+		}
+		return i, nil
+	}
+	booleanToInt := func(input string) (int, error) {
+		i, err := strconv.ParseBool(input)
+		if err != nil {
+			return 0, err
+		}
+		if i {
+			return 1, nil
+		} else {
+			return 0, nil
+		}
+	}
+
+	transforms := make(map[string]func(string) (int, error))
+	transforms["to_int"] = toInt
+	transforms["boolean_to_int"] = booleanToInt
+
 	metricsMessageHandler := func(client mqtt.Client, message mqtt.Message) {
 		payload := strings.TrimSpace(string(message.Payload()))
 		//log.Print("Received: " + payload + " on " + message.Topic())
@@ -204,35 +228,13 @@ func main() {
 	}
 
 	getTransforms := func(w http.ResponseWriter, r *http.Request) {
-		toInt := func(input string) int {
-			i, err := strconv.Atoi(input)
-			if err != nil {
-				return 0
-			}
-			return i
-		}
-		booleanToInt := func(input string) int {
-			i, err := strconv.ParseBool(input)
-			if err != nil {
-				return 0
-			}
-			if i {
-				return 1
-			} else {
-				return 0
-			}
-		}
-		var transforms []model.Transform
-		transforms = append(transforms, model.Transform{Name: "to int", Transform: toInt})
-		transforms = append(transforms, model.Transform{Name: "boolean to int", Transform: booleanToInt})
-
 		type DisplayTransform struct {
 			Name string
 		}
 
 		var displayTransforms = make([]DisplayTransform, 0)
-		for _, t := range transforms {
-			displayTransforms = append(displayTransforms, DisplayTransform{Name: t.Name})
+		for t := range transforms {
+			displayTransforms = append(displayTransforms, DisplayTransform{Name: t})
 		}
 		asJson, _ := json.Marshal(displayTransforms)
 
