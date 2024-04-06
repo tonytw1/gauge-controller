@@ -83,6 +83,8 @@ func main() {
 					gaugesMessage := route.ToGauge + ":" + strconv.Itoa(transformedValue)
 					log.Print("Sending gauge message: " + gaugesMessage)
 					publish(client, "gauges", gaugesMessage)
+				} else {
+					log.Print("Transform error: " + err.Error())
 				}
 			} else {
 				log.Print("Unknown transform: " + route.Transform)
