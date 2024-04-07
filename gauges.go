@@ -57,13 +57,14 @@ func main() {
 			transform, ok := transforms.GetTransformByName(route.Transform)
 			if ok {
 				transformedValue, err := transform(value)
-				if err == nil {
-					gaugesMessage := route.ToGauge + ":" + strconv.Itoa(transformedValue)
-					log.Print("Sending gauge message: " + gaugesMessage)
-					publish(client, "gauges", gaugesMessage)
-				} else {
+				if err != nil {
 					log.Print("Transform error: " + err.Error())
+					return
 				}
+				gaugesMessage := route.ToGauge + ":" + strconv.Itoa(transformedValue)
+				log.Print("Sending gauge message: " + gaugesMessage)
+				publish(client, "gauges", gaugesMessage)
+
 			} else {
 				log.Print("Unknown transform: " + route.Transform)
 			}
