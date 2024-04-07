@@ -54,7 +54,7 @@ func main() {
 		if ok {
 			route := route.(model.Route)
 			log.Print("Routing " + metric.Name + " to " + route.ToGauge)
-			transform, ok := transforms.Transforms()[route.Transform]
+			transform, ok := transforms.GetTransformByName(route.Transform)
 			if ok {
 				transformedValue, err := transform(value)
 				if err != nil {
