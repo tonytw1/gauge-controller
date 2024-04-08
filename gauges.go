@@ -29,6 +29,8 @@ func main() {
 		panic(err)
 	}
 
+	gaugesTopic := "gauges"
+
 	var routes = sync.Map{}
 	var routingTable = sync.Map{}
 
@@ -63,7 +65,7 @@ func main() {
 				}
 				gaugesMessage := route.ToGauge + ":" + strconv.Itoa(transformedValue)
 				log.Print("Sending gauge message: " + gaugesMessage)
-				publish(client, "gauges", gaugesMessage)
+				publish(client, gaugesTopic+"/signals", gaugesMessage)
 
 			} else {
 				log.Print("Unknown transform: " + route.Transform)
@@ -95,9 +97,9 @@ func main() {
 	}
 
 	log.Print("Connecting to MQTT")
-	mqttClient := setupMqttClient(configuration.MqttUrl, "gauges",
+	mqttClient := setupMqttClient(configuration.MqttUrl, "gauges-ui",
 		"metrics/#", metricsMessageHandler,
-		"gauges", gaugesMessageHandler)
+		gaugesTopic+"/announcements", gaugesMessageHandler)
 
 	defer mqttClient.Disconnect(250)
 
@@ -291,17 +293,17 @@ func routesAsJson(routingTable sync.Map) []byte {
 }
 
 func setupMqttClient(mqttURL string, clientId string, metricsTopic string, metricsHandler mqtt.MessageHandler,
-	gaugesTopic string, gaugesHandler mqtt.MessageHandler) mqtt.Client {
+	gaugesAnnouncementsTopic string, gaugesHandler mqtt.MessageHandler) mqtt.Client {
 	mqtt.ERROR = log.New(os.Stdout, "[ERROR] ", 0)
 	mqtt.CRITICAL = log.New(os.Stdout, "[CRIT] ", 0)
 	mqtt.WARN = log.New(os.Stdout, "[WARN]  ", 0)
 
-	var subscribeToTopic mqtt.OnConnectHandler = func(client mqtt.Client) {
+	var subscribeToTopics mqtt.OnConnectHandler = func(client mqtt.Client) {
 		log.Print("Connected to " + mqttURL)
 		log.Print("Subscribing to " + metricsTopic)
 		client.Subscribe(metricsTopic, 0, metricsHandler)
-		log.Print("Subscribing to " + gaugesTopic)
-		client.Subscribe(gaugesTopic, 0, gaugesHandler)
+		log.Print("Subscribing to " + gaugesAnnouncementsTopic)
+		client.Subscribe(gaugesAnnouncementsTopic, 0, gaugesHandler)
 	}
 	var logConnectionLost mqtt.ConnectionLostHandler = func(client mqtt.Client, err error) {
 		log.Print("Connection lost")
@@ -312,7 +314,7 @@ func setupMqttClient(mqttURL string, clientId string, metricsTopic string, metri
 
 	opts := mqtt.NewClientOptions().AddBroker(mqttURL)
 	opts.SetClientID(clientId)
-	opts.SetOnConnectHandler(subscribeToTopic)
+	opts.SetOnConnectHandler(subscribeToTopics)
 	opts.SetConnectionLostHandler(logConnectionLost)
 	opts.SetReconnectingHandler(logReconnecting)
 
