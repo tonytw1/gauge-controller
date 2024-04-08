@@ -231,6 +231,9 @@ func main() {
 		for t := range transforms.Transforms() {
 			displayTransforms = append(displayTransforms, DisplayTransform{Name: t})
 		}
+		sort.Slice(displayTransforms, func(i, j int) bool {
+			return strings.Compare(displayTransforms[i].Name, displayTransforms[j].Name) < 0
+		})
 		asJson, _ := json.Marshal(displayTransforms)
 
 		setCORSHeadersOn(w)
