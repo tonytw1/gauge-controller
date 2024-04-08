@@ -98,7 +98,7 @@ func main() {
 	}
 
 	log.Print("Connecting to MQTT")
-	mqttClient := setupMqttClient(configuration.MqttUrl, "gauges-ui",
+	mqttClient := setupMqttClient(configuration.MqttUrl, "gauges-ui-"+uuid.New().String(),
 		metricsTopic+"/#", metricsMessageHandler,
 		gaugesTopic+"/announcements", gaugesMessageHandler)
 
