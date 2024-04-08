@@ -18,17 +18,16 @@ var booleanToInt = func(input string) (int, error) {
 	}
 }
 
+var transforms = map[string]func(string) (int, error){
+	"to_int":         toInt,
+	"boolean_to_int": booleanToInt,
+}
+
 func Transforms() map[string]func(string) (int, error) {
-	transforms := make(map[string]func(string) (int, error))
-	transforms["to_int"] = toInt
-	transforms["boolean_to_int"] = booleanToInt
 	return transforms
 }
 
 func GetTransformByName(name string) (func(string) (int, error), bool) {
-	transforms := make(map[string]func(string) (int, error))
-	transforms["to_int"] = toInt
-	transforms["boolean_to_int"] = booleanToInt
 	transform, ok := transforms[name]
 	return transform, ok
 }
