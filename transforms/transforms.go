@@ -1,6 +1,7 @@
 package transforms
 
 import "strconv"
+import "github.com/tonytw1/gauges/model"
 
 var toInt = func(input string) (int, error) {
 	return strconv.Atoi(input)
@@ -18,16 +19,16 @@ var booleanToInt = func(input string) (int, error) {
 	}
 }
 
-var transforms = map[string]func(string) (int, error){
-	"to_int":         toInt,
-	"boolean_to_int": booleanToInt,
+var transforms = map[string]model.Transform{
+	"to_int":         {Name: "to_int", Transform: toInt},
+	"boolean_to_int": {Name: "boolean_to_int", Transform: booleanToInt},
 }
 
-func Transforms() map[string]func(string) (int, error) {
+func Transforms() map[string]model.Transform {
 	return transforms
 }
 
-func GetTransformByName(name string) (func(string) (int, error), bool) {
+func GetTransformByName(name string) (model.Transform, bool) {
 	transform, ok := transforms[name]
 	return transform, ok
 }

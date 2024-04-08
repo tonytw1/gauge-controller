@@ -56,7 +56,7 @@ func main() {
 			log.Print("Routing " + metric.Name + " to " + route.ToGauge)
 			transform, ok := transforms.GetTransformByName(route.Transform)
 			if ok {
-				transformedValue, err := transform(value)
+				transformedValue, err := transform.Transform(value)
 				if err != nil {
 					log.Print("Transform error: " + err.Error())
 					return
@@ -202,12 +202,17 @@ func main() {
 			panic(err)
 		}
 
+		transform, ok := transforms.GetTransformByName(rr.Transform)
+		if !ok {
+			http.Error(w, "Invalid transform name", http.StatusBadRequest)
+		}
+
 		id := uuid.New().String()
 		route := model.Route{
 			Id:         id,
 			FromMetric: rr.Metric,
 			ToGauge:    rr.Gauge,
-			Transform:  rr.Transform, // TODO validate transform
+			Transform:  transform.Name,
 		}
 		routes.Store(id, route)
 		routingTable.Store(rr.Metric, route)
