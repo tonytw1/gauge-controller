@@ -202,16 +202,27 @@ func main() {
 			panic(err)
 		}
 
+		metric, ok := metrics.Load(rr.Metric)
+		if !ok {
+			http.Error(w, "Invalid metric name", http.StatusBadRequest)
+			return
+		}
 		transform, ok := transforms.GetTransformByName(rr.Transform)
 		if !ok {
 			http.Error(w, "Invalid transform name", http.StatusBadRequest)
+			return
+		}
+		gauge, ok := gauges.Load(rr.Gauge)
+		if !ok {
+			http.Error(w, "Invalid gauge name", http.StatusBadRequest)
+			return
 		}
 
 		id := uuid.New().String()
 		route := model.Route{
 			Id:         id,
-			FromMetric: rr.Metric,
-			ToGauge:    rr.Gauge,
+			FromMetric: metric.(model.Metric).Name,
+			ToGauge:    gauge.(model.Gauge).Name,
 			Transform:  transform.Name,
 		}
 		routes.Store(id, route)
