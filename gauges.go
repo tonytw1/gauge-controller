@@ -30,6 +30,7 @@ func main() {
 	}
 
 	gaugesTopic := "gauges"
+	metricsTopic := "metrics"
 
 	var routes = sync.Map{}
 	var routingTable = sync.Map{}
@@ -98,7 +99,7 @@ func main() {
 
 	log.Print("Connecting to MQTT")
 	mqttClient := setupMqttClient(configuration.MqttUrl, "gauges-ui",
-		"metrics/#", metricsMessageHandler,
+		metricsTopic+"/#", metricsMessageHandler,
 		gaugesTopic+"/announcements", gaugesMessageHandler)
 
 	defer mqttClient.Disconnect(250)
