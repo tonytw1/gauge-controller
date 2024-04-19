@@ -8,6 +8,7 @@ import (
 	"github.com/tkanos/gonfig"
 	"github.com/tonytw1/gauges/model"
 	"github.com/tonytw1/gauges/transforms"
+	"github.com/tonytw1/gauges/views"
 	"io"
 	"log"
 	"net/http"
@@ -139,7 +140,7 @@ func main() {
 	}
 
 	getRoutes := func(w http.ResponseWriter, r *http.Request) {
-		asJson := routesAsJson(routes)
+		asJson := views.RoutesAsJson(routes)
 
 		setCORSHeadersOn(w)
 		io.WriteString(w, string(asJson))
@@ -196,7 +197,7 @@ func main() {
 			routingTable.Store(effectedMetric, filtered)
 		}
 
-		asJson := routesAsJson(routes)
+		asJson := views.RoutesAsJson(routes)
 		setCORSHeadersOn(w)
 		io.WriteString(w, string(asJson))
 	}
@@ -255,7 +256,7 @@ func main() {
 			routingTable.Store(rr.Metric, []model.Route{route})
 		}
 
-		asJson := routesAsJson(routes)
+		asJson := views.RoutesAsJson(routes)
 		setCORSHeadersOn(w)
 		io.WriteString(w, string(asJson))
 	}
@@ -302,19 +303,6 @@ func main() {
 func setCORSHeadersOn(w http.ResponseWriter) {
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	w.Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS")
-}
-
-func routesAsJson(routes sync.Map) []byte {
-	var routesList = make([]model.Route, 0)
-	routes.Range(func(k, v interface{}) bool {
-		routesList = append(routesList, v.(model.Route))
-		return true
-	})
-	sort.Slice(routes, func(i, j int) bool {
-		return strings.Compare(routesList[i].FromMetric, routesList[j].FromMetric) < 0
-	})
-	asJson, _ := json.Marshal(routesList)
-	return asJson
 }
 
 func setupMqttClient(mqttURL string, clientId string, metricsTopic string, metricsHandler mqtt.MessageHandler,
