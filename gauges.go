@@ -139,7 +139,7 @@ func main() {
 	}
 
 	getRoutes := func(w http.ResponseWriter, r *http.Request) {
-		asJson := routesAsJson(routingTable)
+		asJson := routesAsJson(routes)
 
 		setCORSHeadersOn(w)
 		io.WriteString(w, string(asJson))
@@ -247,15 +247,15 @@ func main() {
 		routes.Store(id, route)
 
 		// Update routing table for effected metric
-		routes, ok := routingTable.Load(rr.Metric)
+		effectedRoutes, ok := routingTable.Load(rr.Metric)
 		if ok {
-			updated := append(routes.([]model.Route), route)
+			updated := append(effectedRoutes.([]model.Route), route)
 			routingTable.Store(rr.Metric, updated)
 		} else {
 			routingTable.Store(rr.Metric, []model.Route{route})
 		}
 
-		asJson := routesAsJson(routingTable)
+		asJson := routesAsJson(routes)
 		setCORSHeadersOn(w)
 		io.WriteString(w, string(asJson))
 	}
@@ -304,16 +304,16 @@ func setCORSHeadersOn(w http.ResponseWriter) {
 	w.Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS")
 }
 
-func routesAsJson(routingTable sync.Map) []byte {
-	var routes = make([]model.Route, 0)
-	routingTable.Range(func(k, v interface{}) bool {
-		routes = append(routes, v.(model.Route))
+func routesAsJson(routes sync.Map) []byte {
+	var routesList = make([]model.Route, 0)
+	routes.Range(func(k, v interface{}) bool {
+		routesList = append(routesList, v.(model.Route))
 		return true
 	})
 	sort.Slice(routes, func(i, j int) bool {
-		return strings.Compare(routes[i].FromMetric, routes[j].FromMetric) < 0
+		return strings.Compare(routesList[i].FromMetric, routesList[j].FromMetric) < 0
 	})
-	asJson, _ := json.Marshal(routes)
+	asJson, _ := json.Marshal(routesList)
 	return asJson
 }
 
