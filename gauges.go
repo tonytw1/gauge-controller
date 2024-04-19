@@ -42,14 +42,15 @@ func main() {
 		payload := strings.TrimSpace(string(message.Payload()))
 		//log.Print("Received: " + payload + " on " + message.Topic())
 
-		split := strings.Split(payload, ":")
-		if len(split) != 2 {
+		topic := message.Topic()
+		payloadFields := strings.Split(payload, ":")
+		if len(payloadFields) != 2 {
 			log.Print("Rejected malformed metrics message: '" + payload + "'")
 			return
 		}
 
-		name := split[0]
-		value := split[1]
+		name := topic + "/" + payloadFields[0]
+		value := payloadFields[1]
 		metric := model.Metric{Name: name, Value: value}
 		metrics.Store(name, metric)
 
