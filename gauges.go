@@ -53,23 +53,27 @@ func main() {
 		metrics.Store(name, metric)
 
 		// Route metrics
-		route, ok := routingTable.Load(metric.Name)
+		routes, ok := routingTable.Load(metric.Name)
 		if ok {
-			route := route.(model.Route)
-			log.Print("Routing " + metric.Name + " to " + route.ToGauge)
-			transform, ok := transforms.GetTransformByName(route.Transform)
+			routes := routes.([]model.Route)
 			if ok {
-				transformedValue, err := transform.Transform(value)
-				if err != nil {
-					log.Print("Transform error: " + err.Error())
-					return
-				}
-				gaugesMessage := route.ToGauge + ":" + strconv.Itoa(transformedValue)
-				log.Print("Sending gauge message: " + gaugesMessage)
-				publish(client, gaugesTopic+"/signals", gaugesMessage)
+				for _, route := range routes {
+					log.Print("Routing " + metric.Name + " to " + route.ToGauge)
+					transform, ok := transforms.GetTransformByName(route.Transform)
+					if ok {
+						transformedValue, err := transform.Transform(value)
+						if err != nil {
+							log.Print("Transform error: " + err.Error())
+							return
+						}
+						gaugesMessage := route.ToGauge + ":" + strconv.Itoa(transformedValue)
+						log.Print("Sending gauge message: " + gaugesMessage)
+						publish(client, gaugesTopic+"/signals", gaugesMessage)
 
-			} else {
-				log.Print("Unknown transform: " + route.Transform)
+					} else {
+						log.Print("Unknown transform: " + route.Transform)
+					}
+				}
 			}
 		}
 	}
@@ -178,7 +182,19 @@ func main() {
 		}
 
 		routes.Delete(route.(model.Route).Id)
-		routingTable.Delete(route.(model.Route).FromMetric)
+		// Update routing table for effected metric
+		effectedMetric := route.(model.Route).FromMetric
+		effectedMetricRoutes, ok := routingTable.Load(effectedMetric)
+		if ok {
+			// Filter out the route that was deleted
+			filtered := make([]model.Route, 0)
+			for _, route := range effectedMetricRoutes.([]model.Route) {
+				if route.Id != id {
+					filtered = append(filtered, route)
+				}
+			}
+			routingTable.Store(effectedMetric, filtered)
+		}
 
 		asJson := routesAsJson(routes)
 		setCORSHeadersOn(w)
@@ -229,9 +245,17 @@ func main() {
 			Transform:  transform.Name,
 		}
 		routes.Store(id, route)
-		routingTable.Store(rr.Metric, route)
 
-		asJson := routesAsJson(routes)
+		// Update routing table for effected metric
+		routes, ok := routingTable.Load(rr.Metric)
+		if ok {
+			updated := append(routes.([]model.Route), route)
+			routingTable.Store(rr.Metric, updated)
+		} else {
+			routingTable.Store(rr.Metric, []model.Route{route})
+		}
+
+		asJson := routesAsJson(routingTable)
 		setCORSHeadersOn(w)
 		io.WriteString(w, string(asJson))
 	}
