@@ -49,7 +49,8 @@ func main() {
 			return
 		}
 
-		name := topic + "/" + payloadFields[0]
+		subtopic := strings.TrimPrefix(topic, metricsTopic+"/")
+		name := subtopic + "/" + payloadFields[0]
 		value := payloadFields[1]
 		metric := model.Metric{Name: name, Value: value}
 		metrics.Store(name, metric)
