@@ -35,7 +35,7 @@ export function AddRoute({updateRoutes} : {updateRoutes: (routes: Route[]) => vo
         <form method="post" onSubmit={handleSubmit}>
             <h4>Add route</h4>
             <MetricsDropdown /> to <TransformsDropdown /> to <GaugesDropdown />
-            <button type="submit">Submit</button>
+            <button type="submit">Add route</button>
         </form>
     )
 }
