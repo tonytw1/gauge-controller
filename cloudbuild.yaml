@@ -1,5 +1,13 @@
 steps:
+- name: 'node:21-alpine'
+  entrypoint: 'npm'
+  dir: 'client'
+  args: ['install']
+- name: 'node:21-alpine'
+  entrypoint: 'npm'
+  dir: 'client'
+  args: ['run', 'build']
 - name: 'gcr.io/cloud-builders/docker'
-  args: ['build', '-t', 'eu.gcr.io/$PROJECT_ID/gauge-controller', '.']
+  args: [ 'build', '-t', 'eu.gcr.io/$PROJECT_ID/gauge-controller', '.' ]
 - name: 'gcr.io/cloud-builders/docker'
   args: ['push', 'eu.gcr.io/$PROJECT_ID/gauge-controller']
