@@ -1,12 +1,7 @@
 FROM golang:1.20
 
 WORKDIR /go/src/app
-COPY . .
-
-RUN go get -d -t -v ./...
-RUN go install -v ./...
-RUN go test -v
-RUN go build -v
-RUN go test ./...
+COPY gauges .
+COPY client/dist/ client/dist
 
 CMD ["gauges"]
