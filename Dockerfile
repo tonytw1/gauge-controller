@@ -1,7 +1,8 @@
 FROM golang:1.20
 
-WORKDIR /go/src/app
+WORKDIR /opt/gauges
 COPY gauges .
+COPY config.json .
 COPY client/dist/ client/dist
 
-CMD ["gauges"]
+CMD ["/opt/gauges/gauges"]
