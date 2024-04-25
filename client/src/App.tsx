@@ -5,7 +5,7 @@ import {useEffect, useState} from "react";
 
 function App() {
 
-    const apiUrl = 'http://10.0.46.10:32100';
+    const apiUrl = 'http://10.0.46.10:32100'  // TODO what's a good pattern for configuring a React client at deploy time?
 
     const [routes, setRoutes] = useState<Route[]>(new Array<Route>());
 
