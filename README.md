@@ -4,7 +4,7 @@ Listens for metrics on the local MQTT message queue.
 Provides a UI to select interesting metrics and forward them to gauges which announce themselves via MQTT.
 
 React client with a Golang backend.
-Used to a my sandbox project for staying current in React front ends, Golang and building non Intel container images.
+Used as my sandbox project for staying current in React front ends, Golang and building non Intel container images.
 
 
 
