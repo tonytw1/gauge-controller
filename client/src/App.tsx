@@ -5,8 +5,9 @@ import {useEffect, useState} from "react";
 
 function App() {
 
-    const [routes, setRoutes] = useState<Route[]>(new Array<Route>());
     const apiUrl = 'http://10.0.46.10:32100';
+
+    const [routes, setRoutes] = useState<Route[]>(new Array<Route>());
 
     function updateRoutes(routes: Route[]): void {
         setRoutes(routes)
@@ -31,9 +32,9 @@ function App() {
     return (
         <>
             <h1>Routes</h1>
-            <AddRoute updateRoutes={updateRoutes}/>
+            <AddRoute updateRoutes={updateRoutes} apiUrl={apiUrl}/>
             <hr/>
-            <Routes routes={routes} updateRoutes={updateRoutes}/>
+            <Routes routes={routes} updateRoutes={updateRoutes} apiUrl={apiUrl}/>
             <hr/>
         </>
     )

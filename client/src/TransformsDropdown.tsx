@@ -1,9 +1,8 @@
 import {useEffect, useState} from 'react';
 
-export function TransformsDropdown() {
+export function TransformsDropdown({apiUrl}: { apiUrl: string }) {
 
     const [transforms, setTransforms] = useState<Transform[]>([]);
-    const apiUrl = 'http://10.0.46.10:32100';
 
     function getTransformsAsync() {
         return fetch(apiUrl + '/transforms')
@@ -27,7 +26,7 @@ export function TransformsDropdown() {
                 <option value={transform.Name}>{transform.Name}</option>
             </>
         )
-    };
+    }
 
     const listItems = transforms.map(transform => <TransformOption transform={transform}/>);
 

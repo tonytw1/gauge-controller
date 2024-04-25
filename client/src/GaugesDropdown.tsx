@@ -1,9 +1,8 @@
 import {useEffect, useState} from 'react';
 
-export function GaugesDropdown() {
+export function GaugesDropdown({apiUrl}: { apiUrl: string }) {
 
     const [gauges, setGauges] = useState<Gauge[]>([]);
-    const apiUrl = 'http://10.0.46.10:32100';
 
     function getGaugesAsync() {
         return fetch(apiUrl + '/gauges')

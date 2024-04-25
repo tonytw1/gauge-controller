@@ -1,8 +1,6 @@
-export function Routes({routes, updateRoutes} : {routes: Route[], updateRoutes:any}) {
+export function Routes({routes, updateRoutes, apiUrl}: { routes: Route[], updateRoutes: any, apiUrl: string }) {
 
-    const apiUrl = 'http://10.0.46.10:32100';
-
-    function DeleteRoute({route} : {route:Route}) {
+    function DeleteRoute({route}: { route: Route }) {
 
         function handleDeleteRoute(e: React.FormEvent<HTMLButtonElement>) {
             e.preventDefault();
@@ -25,21 +23,21 @@ export function Routes({routes, updateRoutes} : {routes: Route[], updateRoutes:a
         )
     }
 
-    function RouteRow({route} : {route:Route}) {
+    function RouteRow({route}: { route: Route }) {
         return (
             <>
-                <h4>{route.FromMetric} to {route.Transform} to {route.ToGauge} - <DeleteRoute route={route} /></h4>
+                <h4>{route.FromMetric} to {route.Transform} to {route.ToGauge} - <DeleteRoute route={route}/></h4>
             </>
         )
     };
 
     const listItems = routes.map(route =>
-        <li key={route.Id}><RouteRow route={route} /></li>
+        <li key={route.Id}><RouteRow route={route}/></li>
     );
 
     return (
         <>
-        <ul>{listItems}</ul>
+            <ul>{listItems}</ul>
         </>
     )
 }

@@ -3,9 +3,7 @@ import {GaugesDropdown} from "./GaugesDropdown.tsx";
 import {TransformsDropdown} from "./TransformsDropdown.tsx";
 import React from "react";
 
-export function AddRoute({updateRoutes} : {updateRoutes: (routes: Route[]) => void}) {
-
-    const apiUrl = 'http://10.0.46.10:32100';
+export function AddRoute({updateRoutes, apiUrl} : {updateRoutes: (routes: Route[]) => void, apiUrl: string}) {
 
     function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
         // Prevent the browser from reloading the page
@@ -35,7 +33,7 @@ export function AddRoute({updateRoutes} : {updateRoutes: (routes: Route[]) => vo
 
     return (
         <form method="post" onSubmit={handleSubmit}>
-            <MetricsDropdown /> to <TransformsDropdown /> to <GaugesDropdown />
+            <MetricsDropdown apiUrl={apiUrl} /> to <TransformsDropdown apiUrl={apiUrl}/> to <GaugesDropdown apiUrl={apiUrl}/>
             <button type="submit">Add route</button>
         </form>
     )
