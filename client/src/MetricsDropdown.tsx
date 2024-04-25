@@ -3,9 +3,10 @@ import {useEffect, useState} from 'react';
 export function MetricsDropdown() {
 
     const [metrics, setMetrics] = useState<Metric[]>([]);
+    const apiUrl = 'http://10.0.46.10:32100';
 
     function getMetricsAsync() {
-        return fetch('http://10.0.46.10:32100/metrics')
+        return fetch(apiUrl + '/metrics')
             .then((response) => response.text())
             .then((responseJson) => {
                 const metrics = JSON.parse(responseJson);

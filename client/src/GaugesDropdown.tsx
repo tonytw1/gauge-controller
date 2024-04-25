@@ -3,9 +3,10 @@ import {useEffect, useState} from 'react';
 export function GaugesDropdown() {
 
     const [gauges, setGauges] = useState<Gauge[]>([]);
+    const apiUrl = 'http://10.0.46.10:32100';
 
     function getGaugesAsync() {
-        return fetch('http://10.0.46.10:32100/gauges')
+        return fetch(apiUrl + '/gauges')
             .then((response) => response.text())
             .then((responseJson) => {
                 const gauges = JSON.parse(responseJson);

@@ -3,9 +3,10 @@ import {useEffect, useState} from 'react';
 export function TransformsDropdown() {
 
     const [transforms, setTransforms] = useState<Transform[]>([]);
+    const apiUrl = 'http://10.0.46.10:32100';
 
     function getTransformsAsync() {
-        return fetch('http://10.0.46.10:32100/transforms')
+        return fetch(apiUrl + '/transforms')
             .then((response) => response.text())
             .then((responseJson) => {
                 const gauges = JSON.parse(responseJson);

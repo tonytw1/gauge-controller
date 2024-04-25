@@ -1,5 +1,7 @@
 export function Routes({routes, updateRoutes} : {routes: Route[], updateRoutes:any}) {
 
+    const apiUrl = 'http://10.0.46.10:32100';
+
     function DeleteRoute({route} : {route:Route}) {
 
         function handleDeleteRoute(e: React.FormEvent<HTMLButtonElement>) {
@@ -7,7 +9,7 @@ export function Routes({routes, updateRoutes} : {routes: Route[], updateRoutes:a
             const requestOptions = {
                 method: 'DELETE',
             }
-            return fetch('http://10.0.46.10:32100/routes/' + route.Id, requestOptions)
+            return fetch(apiUrl + '/routes/' + route.Id, requestOptions)
                 .then((response) => response.text())
                 .then((responseJson) => {
                     routes = JSON.parse(responseJson);

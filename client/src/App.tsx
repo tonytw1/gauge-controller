@@ -6,13 +6,14 @@ import {useEffect, useState} from "react";
 function App() {
 
     const [routes, setRoutes] = useState<Route[]>(new Array<Route>());
+    const apiUrl = 'http://10.0.46.10:32100';
 
     function updateRoutes(routes: Route[]): void {
         setRoutes(routes)
     };
 
     function getRoutesAsync() {
-        return fetch('http://10.0.46.10:32100/routes')
+        return fetch(apiUrl + '/routes')
             .then((response) => response.text())
             .then((responseJson) => {
                 const routes: Route[] = JSON.parse(responseJson);

@@ -5,6 +5,8 @@ import React from "react";
 
 export function AddRoute({updateRoutes} : {updateRoutes: (routes: Route[]) => void}) {
 
+    const apiUrl = 'http://10.0.46.10:32100';
+
     function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
         // Prevent the browser from reloading the page
         e.preventDefault();
@@ -19,7 +21,7 @@ export function AddRoute({updateRoutes} : {updateRoutes: (routes: Route[]) => vo
             body: JSON.stringify(formJson)
         }
 
-        fetch('http://10.0.46.10:32100/routes', requestOptions)
+        fetch(apiUrl + '/routes', requestOptions)
             .then((response) => response.text())
             .then((responseJson) => {
                 const routes = JSON.parse(responseJson);
