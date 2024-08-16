@@ -8,6 +8,16 @@ Used as my sandbox project for staying current in React front ends, Golang and b
 
 
 
+### Client local dev
+
+```
+cd client
+npm dev
+```
+
+UI is on `http://localhost:5173/`
+
+
 ### Client build
 
 ```
