@@ -1,9 +1,27 @@
 import {MetricsDropdown} from "./MetricsDropdown.tsx";
 import {GaugesDropdown} from "./GaugesDropdown.tsx";
 import {TransformsDropdown} from "./TransformsDropdown.tsx";
-import React from "react";
+import React, {useEffect, useState} from "react";
 
 export function AddRoute({updateRoutes, apiUrl} : {updateRoutes: (routes: Route[]) => void, apiUrl: string}) {
+
+    const [transforms, setTransforms] = useState<Transform[]>([]);
+
+    function getTransformsAsync() {
+        return fetch(apiUrl + '/transforms')
+            .then((response) => response.text())
+            .then((responseJson) => {
+                const gauges = JSON.parse(responseJson);
+                setTransforms(gauges);
+            })
+            .catch((error) => {
+                console.error(error);
+            });
+    }
+
+    useEffect(() => {
+        getTransformsAsync()
+    }, []);
 
     function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
         // Prevent the browser from reloading the page
@@ -33,7 +51,7 @@ export function AddRoute({updateRoutes, apiUrl} : {updateRoutes: (routes: Route[
 
     return (
         <form method="post" onSubmit={handleSubmit}>
-            <MetricsDropdown apiUrl={apiUrl} /> to <TransformsDropdown apiUrl={apiUrl}/> to <GaugesDropdown apiUrl={apiUrl}/>
+            <MetricsDropdown apiUrl={apiUrl} /> to <TransformsDropdown transforms={transforms}/> to <GaugesDropdown apiUrl={apiUrl}/>
             <button type="submit">Add route</button>
         </form>
     )
