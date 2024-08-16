@@ -20,8 +20,39 @@ export function AddRoute({updateRoutes, apiUrl} : {updateRoutes: (routes: Route[
     }
 
     useEffect(() => {
-        getTransformsAsync()
+        getTransformsAsync();
+        getGaugesAsync();
+        getMetricsAsync();
     }, []);
+
+    const [gauges, setGauges] = useState<Gauge[]>([]);
+
+    function getGaugesAsync() {
+        return fetch(apiUrl + '/gauges')
+            .then((response) => response.text())
+            .then((responseJson) => {
+                const gauges = JSON.parse(responseJson);
+                setGauges(gauges);
+            })
+            .catch((error) => {
+                console.error(error);
+            });
+    }
+
+    const [metrics, setMetrics] = useState<Metric[]>([]);
+
+    function getMetricsAsync() {
+        return fetch(apiUrl + '/metrics')
+            .then((response) => response.text())
+            .then((responseJson) => {
+                const metrics = JSON.parse(responseJson);
+                setMetrics(metrics);
+
+            })
+            .catch((error) => {
+                console.error(error);
+            });
+    }
 
     function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
         // Prevent the browser from reloading the page
@@ -51,8 +82,16 @@ export function AddRoute({updateRoutes, apiUrl} : {updateRoutes: (routes: Route[
 
     return (
         <form method="post" onSubmit={handleSubmit}>
-            <MetricsDropdown apiUrl={apiUrl} /> to <TransformsDropdown transforms={transforms}/> to <GaugesDropdown apiUrl={apiUrl}/>
-            <button type="submit">Add route</button>
+            {gauges.length > 0 && metrics.length > 0 && transforms.length > 0
+                ? <>
+                    <MetricsDropdown metrics={metrics}/> to <TransformsDropdown
+                    transforms={transforms}/> to <GaugesDropdown gauges={gauges}/>
+                    <button type="submit">Add route</button>
+                </>
+                : <>
+                    <p>Missing metrics, transforms or gauges; cannot add a new route</p>
+                </>
+            }
         </form>
     )
 }

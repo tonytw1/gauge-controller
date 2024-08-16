@@ -1,25 +1,4 @@
-import {useEffect, useState} from 'react';
-
-export function MetricsDropdown({apiUrl}: { apiUrl: string }) {
-
-    const [metrics, setMetrics] = useState<Metric[]>([]);
-
-    function getMetricsAsync() {
-        return fetch(apiUrl + '/metrics')
-            .then((response) => response.text())
-            .then((responseJson) => {
-                const metrics = JSON.parse(responseJson);
-                setMetrics(metrics);
-
-            })
-            .catch((error) => {
-                console.error(error);
-            });
-    }
-
-    useEffect(() => {
-        getMetricsAsync()
-    }, []);
+export function MetricsDropdown({metrics}: { metrics: Metric[] }) {
 
     function MetricOption({row}: { row: Metric }) {
         return (

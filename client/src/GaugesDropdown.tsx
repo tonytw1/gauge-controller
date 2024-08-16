@@ -1,24 +1,4 @@
-import {useEffect, useState} from 'react';
-
-export function GaugesDropdown({apiUrl}: { apiUrl: string }) {
-
-    const [gauges, setGauges] = useState<Gauge[]>([]);
-
-    function getGaugesAsync() {
-        return fetch(apiUrl + '/gauges')
-            .then((response) => response.text())
-            .then((responseJson) => {
-                const gauges = JSON.parse(responseJson);
-                setGauges(gauges);
-            })
-            .catch((error) => {
-                console.error(error);
-            });
-    }
-
-    useEffect(() => {
-        getGaugesAsync()
-    }, []);
+export function GaugesDropdown({gauges}: { gauges: Gauge[] }) {
 
     function GaugeOption({gauge}: { gauge: Gauge }) {
         return (
