@@ -12,7 +12,7 @@ Used as my sandbox project for staying current in React front ends, Golang and b
 
 ```
 cd client
-npm dev
+npm run dev
 ```
 
 UI is on `http://localhost:5173/`
