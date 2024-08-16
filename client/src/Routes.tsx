@@ -37,7 +37,14 @@ export function Routes({routes, updateRoutes, apiUrl}: { routes: Route[], update
 
     return (
         <>
-            <ul>{listItems}</ul>
+            {routes.length > 0
+            ? <>
+                <ul>{listItems}</ul>
+                </>
+            : <>
+                    <p>No routes</p>
+                </>
+            }
         </>
-    )
+    );
 }
