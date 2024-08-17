@@ -1,18 +1,13 @@
+import {Select} from '@headlessui/react'
+
 export function GaugesDropdown({gauges}: { gauges: Gauge[] }) {
-
-    function GaugeOption({gauge}: { gauge: Gauge }) {
-        return (
-            <>
-                <option value={gauge.Name}>{gauge.Name}</option>
-            </>
-        )
-    };
-
-    const listItems = gauges.map(gauge => <GaugeOption gauge={gauge}/>);
-
     return (
-        <>
-            <select name="Gauge">{listItems}</select>
-        </>
+        <Select name="Gauge" aria-label="Destination gauge">
+            {
+                gauges.map(gauge =>
+                    <option value={gauge.Name}>{gauge.Name}</option>
+                )
+            }
+        </Select>
     )
 }

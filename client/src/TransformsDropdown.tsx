@@ -1,18 +1,12 @@
+import {Select} from '@headlessui/react'
+
 export function TransformsDropdown({transforms}: { transforms: Transform[] }) {
-
-    function TransformOption({transform}: { transform: Transform }) {
-        return (
-            <>
-                <option value={transform.Name}>{transform.Name}</option>
-            </>
-        )
-    }
-
-    const listItems = transforms.map(transform => <TransformOption transform={transform}/>);
-
     return (
-        <>
-            <select name="Transform">{listItems}</select>
-        </>
+        <Select name={"Transform"} aria-description={"Transform to apply"}>
+            {transforms.map(transform =>
+                <option value={transform.Name}>{transform.Name}</option>
+            )
+            }
+        </Select>
     )
 }
