@@ -2,6 +2,9 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
+	"github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/aws/aws-sdk-go-v2/service/s3"
 	mqtt "github.com/eclipse/paho.mqtt.golang"
 	"github.com/google/uuid"
 	"github.com/gorilla/mux"
@@ -20,9 +23,15 @@ import (
 	"time"
 )
 
+import (
+	"context"
+	"github.com/aws/aws-sdk-go-v2/config"
+)
+
 func main() {
 	type Configuration struct {
 		MqttUrl string
+		Bucket  string
 	}
 	configuration := Configuration{}
 	err := gonfig.GetConf("config.json", &configuration)
@@ -30,14 +39,29 @@ func main() {
 		panic(err)
 	}
 
+	// Setup S3 client
+	region := "eu-west-2"
+	cfg, err := config.LoadDefaultConfig(context.TODO(), config.WithRegion(region))
+	if err != nil {
+		log.Fatal(err)
+	}
+	s3Client := s3.NewFromConfig(cfg)
+	bucket := configuration.Bucket
+	key := "routes.json"
+
 	gaugesTopic := "gauges"
 	metricsTopic := "metrics"
 
 	var routes = sync.Map{}
 	var routingTable = sync.Map{}
 
-	var metrics = sync.Map{}
+	// Reload persisted routes
+	persistedRoutes := loadPersistedRoutes(bucket, key, s3Client)
+	for _, route := range persistedRoutes {
+		addRoute(&routes, route, &routingTable)
+	}
 
+	var metrics = sync.Map{}
 	metricsMessageHandler := func(client mqtt.Client, message mqtt.Message) {
 		payload := strings.TrimSpace(string(message.Payload()))
 		//log.Print("Received: " + payload + " on " + message.Topic())
@@ -200,6 +224,13 @@ func main() {
 		}
 
 		asJson := views.RoutesAsJson(routes)
+
+		_, err = persistRoutes(s3Client, bucket, key, asJson)
+		if err != nil {
+			http.Error(w, "Failed to store updated routes", http.StatusInternalServerError)
+			return
+		}
+
 		setCORSHeadersOn(w)
 		io.WriteString(w, string(asJson))
 	}
@@ -247,18 +278,16 @@ func main() {
 			ToGauge:    gauge.(model.Gauge).Name,
 			Transform:  transform.Name,
 		}
-		routes.Store(id, route)
-
-		// Update routing table for effected metric
-		effectedRoutes, ok := routingTable.Load(rr.Metric)
-		if ok {
-			updated := append(effectedRoutes.([]model.Route), route)
-			routingTable.Store(rr.Metric, updated)
-		} else {
-			routingTable.Store(rr.Metric, []model.Route{route})
-		}
+		addRoute(&routes, route, &routingTable)
 
 		asJson := views.RoutesAsJson(routes)
+
+		_, err = persistRoutes(s3Client, bucket, key, asJson)
+		if err != nil {
+			http.Error(w, "Failed to store updated routes", http.StatusInternalServerError)
+			return
+		}
+
 		setCORSHeadersOn(w)
 		io.WriteString(w, string(asJson))
 	}
@@ -300,6 +329,69 @@ func main() {
 		log.Print(err)
 	}
 	log.Print("Done")
+}
+
+func addRoute(routes *sync.Map, route model.Route, routingTable *sync.Map) {
+	routes.Store(route.Id, route)
+	// Update routing table for effected metric
+	effectedRoutes, ok := routingTable.Load(route.FromMetric)
+	if ok {
+		updated := append(effectedRoutes.([]model.Route), route)
+		routingTable.Store(route.FromMetric, updated)
+	} else {
+		routingTable.Store(route.FromMetric, []model.Route{route})
+	}
+}
+
+func persistRoutes(s3Client *s3.Client, bucket string, key string, asJson []byte) (*s3.PutObjectOutput, error) {
+	log.Print("Persisting routes to bucket: '" + bucket + "'" + " key: '" + key + "'")
+	body := string(asJson)
+	log.Print("Persisting: " + body)
+	output, err := s3Client.PutObject(context.TODO(), &s3.PutObjectInput{
+		Bucket: aws.String(bucket),
+		Key:    aws.String(key),
+		Body:   strings.NewReader(body),
+	})
+	if err != nil {
+		log.Print("Failed to persist routes: " + err.Error())
+		return output, err
+	}
+	log.Print("Persisted routes")
+	return output, nil
+}
+
+func loadPersistedRoutes(bucket string, key string, s3Client *s3.Client) []model.Route {
+	persistedRoutes := make([]model.Route, 0)
+	log.Print("Loading persisted routes from bucket: '" + bucket + "'" + " key: '" + key + "'")
+	persistedRoutesObject, err := s3Client.GetObject(context.TODO(), &s3.GetObjectInput{
+		Bucket: aws.String(bucket),
+		Key:    aws.String(key),
+	})
+	if err != nil {
+		log.Print("Could not load persisted routes: " + err.Error())
+	} else {
+		if persistedRoutesObject.Body != nil {
+			buf := new(strings.Builder)
+			_, err := io.Copy(buf, persistedRoutesObject.Body)
+			if err == nil {
+				persistedJson := buf.String()
+				log.Print("Persisted JSON: " + persistedJson)
+
+				err = json.NewDecoder(strings.NewReader(persistedJson)).Decode(&persistedRoutes)
+				if err != nil {
+					log.Print("Could not decode persisted routes: " + err.Error())
+				} else {
+					log.Print("Loaded " + strconv.Itoa(len(persistedRoutes)) + " persisted routes")
+				}
+			} else {
+				log.Print("Could not read persisted routes")
+				fmt.Sprint(err.Error())
+			}
+		} else {
+			log.Print("Persisted routes object body is nil")
+		}
+	}
+	return persistedRoutes
 }
 
 func setCORSHeadersOn(w http.ResponseWriter) {
