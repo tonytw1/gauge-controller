@@ -2,6 +2,7 @@ import {MetricsDropdown} from "./MetricsDropdown.tsx";
 import {GaugesDropdown} from "./GaugesDropdown.tsx";
 import {TransformsDropdown} from "./TransformsDropdown.tsx";
 import React, {useEffect, useState} from "react";
+import { Button } from '@headlessui/react'
 
 export function AddRoute({updateRoutes, apiUrl} : {updateRoutes: (routes: Route[]) => void, apiUrl: string}) {
 
@@ -86,7 +87,7 @@ export function AddRoute({updateRoutes, apiUrl} : {updateRoutes: (routes: Route[
                 ? <>
                     <MetricsDropdown metrics={metrics}/> to <TransformsDropdown
                     transforms={transforms}/> to <GaugesDropdown gauges={gauges}/>
-                    <button type="submit">Add route</button>
+                    <Button type={"submit"}>Add route</Button>
                 </>
                 : <>
                     <p>Missing metrics, transforms or gauges; cannot add a new route</p>
