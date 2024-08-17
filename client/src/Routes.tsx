@@ -1,3 +1,5 @@
+import { Button } from '@headlessui/react'
+
 export function Routes({routes, updateRoutes, apiUrl}: { routes: Route[], updateRoutes: any, apiUrl: string }) {
 
     function DeleteRoute({route}: { route: Route }) {
@@ -19,7 +21,7 @@ export function Routes({routes, updateRoutes, apiUrl}: { routes: Route[], update
         }
 
         return (
-            <button onClick={handleDeleteRoute}>Delete</button>
+            <Button onClick={handleDeleteRoute}>Delete</Button>
         )
     }
 
