@@ -41,7 +41,7 @@ var toIntTimesZeroDotTen = func(input string) (int, error) {
 
 var transforms = map[string]model.Transform{
 	"to_int":                    {Name: "to_int", Transform: toInt},
-	"to_int_times_zero_dot_ten": {Name: "to_int * 0.1", Transform: toIntTimesZeroDotTen},
+	"to_int_times_zero_dot_ten": {Name: "to_int_times_zero_dot_ten", Transform: toIntTimesZeroDotTen},
 	"boolean_to_int":            {Name: "boolean_to_int", Transform: booleanToInt},
 	"inverted_boolean_to_int":   {Name: "inverted_boolean_to_int", Transform: invertedBooleanToInt},
 }
