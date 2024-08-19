@@ -3,7 +3,6 @@ package persistence
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
 	"github.com/tonytw1/gauges/model"
@@ -13,13 +12,24 @@ import (
 	"strings"
 )
 
-func PersistRoutes(s3Client *s3.Client, bucket string, key string, asJson []byte) (*s3.PutObjectOutput, error) {
-	log.Print("Persisting routes to bucket: '" + bucket + "'" + " key: '" + key + "'")
+type RoutePersistence interface {
+	PersistRoutes(asJson []byte) (*s3.PutObjectOutput, error)
+	LodPersistedRoutes() []model.Route
+}
+
+type S3RoutePersistence struct {
+	S3Client *s3.Client
+	Bucket   string
+	Key      string
+}
+
+func (svc S3RoutePersistence) PersistRoutes(asJson []byte) (*s3.PutObjectOutput, error) {
+	log.Print("Persisting routes to bucket: '" + svc.Bucket + "'" + " key: '" + svc.Key + "'")
 	body := string(asJson)
 	log.Print("Persisting: " + body)
-	output, err := s3Client.PutObject(context.TODO(), &s3.PutObjectInput{
-		Bucket: aws.String(bucket),
-		Key:    aws.String(key),
+	output, err := svc.S3Client.PutObject(context.TODO(), &s3.PutObjectInput{
+		Bucket: aws.String(svc.Bucket),
+		Key:    aws.String(svc.Key),
 		Body:   strings.NewReader(body),
 	})
 	if err != nil {
@@ -30,12 +40,12 @@ func PersistRoutes(s3Client *s3.Client, bucket string, key string, asJson []byte
 	return output, nil
 }
 
-func LoadPersistedRoutes(bucket string, key string, s3Client *s3.Client) []model.Route {
+func (svc S3RoutePersistence) LoadPersistedRoutes() []model.Route {
 	persistedRoutes := make([]model.Route, 0)
-	log.Print("Loading persisted routes from bucket: '" + bucket + "'" + " key: '" + key + "'")
-	persistedRoutesObject, err := s3Client.GetObject(context.TODO(), &s3.GetObjectInput{
-		Bucket: aws.String(bucket),
-		Key:    aws.String(key),
+	log.Print("Loading persisted routes from bucket: '" + svc.Bucket + "'" + " key: '" + svc.Key + "'")
+	persistedRoutesObject, err := svc.S3Client.GetObject(context.TODO(), &s3.GetObjectInput{
+		Bucket: aws.String(svc.Bucket),
+		Key:    aws.String(svc.Key),
 	})
 	if err != nil {
 		log.Print("Could not load persisted routes: " + err.Error())
@@ -55,7 +65,6 @@ func LoadPersistedRoutes(bucket string, key string, s3Client *s3.Client) []model
 				}
 			} else {
 				log.Print("Could not read persisted routes")
-				fmt.Sprint(err.Error())
 			}
 		} else {
 			log.Print("Persisted routes object body is nil")

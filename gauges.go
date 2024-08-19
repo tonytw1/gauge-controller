@@ -45,20 +45,19 @@ func main() {
 		log.Fatal(err)
 	}
 	s3Client := s3.NewFromConfig(cfg)
-	bucket := configuration.Bucket
-	key := "routes.json"
-
-	gaugesTopic := "gauges"
-	metricsTopic := "metrics"
+	routePersistence := persistence.S3RoutePersistence{S3Client: s3Client, Bucket: configuration.Bucket, Key: "routes.json"}
 
 	var routes = sync.Map{}
 	var routingTable = sync.Map{}
 
 	// Reload persisted routes
-	persistedRoutes := persistence.LoadPersistedRoutes(bucket, key, s3Client)
+	persistedRoutes := routePersistence.LoadPersistedRoutes()
 	for _, route := range persistedRoutes {
 		addRoute(&routes, route, &routingTable)
 	}
+
+	gaugesTopic := "gauges"
+	metricsTopic := "metrics"
 
 	var metrics = sync.Map{}
 	metricsMessageHandler := func(client mqtt.Client, message mqtt.Message) {
@@ -224,7 +223,7 @@ func main() {
 
 		asJson := views.RoutesAsJson(routes)
 
-		_, err = persistence.PersistRoutes(s3Client, bucket, key, asJson)
+		_, err = routePersistence.PersistRoutes(asJson)
 		if err != nil {
 			http.Error(w, "Failed to store updated routes", http.StatusInternalServerError)
 			return
@@ -281,7 +280,7 @@ func main() {
 
 		asJson := views.RoutesAsJson(routes)
 
-		_, err = persistence.PersistRoutes(s3Client, bucket, key, asJson)
+		_, err = routePersistence.PersistRoutes(asJson)
 		if err != nil {
 			http.Error(w, "Failed to store updated routes", http.StatusInternalServerError)
 			return
