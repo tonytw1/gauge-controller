@@ -2,11 +2,13 @@ package main
 
 import (
 	"encoding/json"
+	"github.com/aws/aws-sdk-go-v2/service/s3"
 	mqtt "github.com/eclipse/paho.mqtt.golang"
 	"github.com/google/uuid"
 	"github.com/gorilla/mux"
 	"github.com/tkanos/gonfig"
 	"github.com/tonytw1/gauges/model"
+	"github.com/tonytw1/gauges/persistence"
 	"github.com/tonytw1/gauges/transforms"
 	"github.com/tonytw1/gauges/views"
 	"io"
@@ -20,9 +22,15 @@ import (
 	"time"
 )
 
+import (
+	"context"
+	"github.com/aws/aws-sdk-go-v2/config"
+)
+
 func main() {
 	type Configuration struct {
 		MqttUrl string
+		Bucket  string
 	}
 	configuration := Configuration{}
 	err := gonfig.GetConf("config.json", &configuration)
@@ -30,14 +38,28 @@ func main() {
 		panic(err)
 	}
 
-	gaugesTopic := "gauges"
-	metricsTopic := "metrics"
+	// Setup S3 client
+	region := "eu-west-2"
+	cfg, err := config.LoadDefaultConfig(context.TODO(), config.WithRegion(region))
+	if err != nil {
+		log.Fatal(err)
+	}
+	s3Client := s3.NewFromConfig(cfg)
+	routePersistence := persistence.S3RoutePersistence{S3Client: s3Client, Bucket: configuration.Bucket, Key: "routes.json"}
 
 	var routes = sync.Map{}
 	var routingTable = sync.Map{}
 
-	var metrics = sync.Map{}
+	// Reload persisted routes
+	persistedRoutes := routePersistence.LoadPersistedRoutes()
+	for _, route := range persistedRoutes {
+		addRoute(&routes, route, &routingTable)
+	}
 
+	gaugesTopic := "gauges"
+	metricsTopic := "metrics"
+
+	var metrics = sync.Map{}
 	metricsMessageHandler := func(client mqtt.Client, message mqtt.Message) {
 		payload := strings.TrimSpace(string(message.Payload()))
 		//log.Print("Received: " + payload + " on " + message.Topic())
@@ -200,6 +222,13 @@ func main() {
 		}
 
 		asJson := views.RoutesAsJson(routes)
+
+		_, err = routePersistence.PersistRoutes(asJson)
+		if err != nil {
+			http.Error(w, "Failed to store updated routes", http.StatusInternalServerError)
+			return
+		}
+
 		setCORSHeadersOn(w)
 		io.WriteString(w, string(asJson))
 	}
@@ -247,18 +276,16 @@ func main() {
 			ToGauge:    gauge.(model.Gauge).Name,
 			Transform:  transform.Name,
 		}
-		routes.Store(id, route)
-
-		// Update routing table for effected metric
-		effectedRoutes, ok := routingTable.Load(rr.Metric)
-		if ok {
-			updated := append(effectedRoutes.([]model.Route), route)
-			routingTable.Store(rr.Metric, updated)
-		} else {
-			routingTable.Store(rr.Metric, []model.Route{route})
-		}
+		addRoute(&routes, route, &routingTable)
 
 		asJson := views.RoutesAsJson(routes)
+
+		_, err = routePersistence.PersistRoutes(asJson)
+		if err != nil {
+			http.Error(w, "Failed to store updated routes", http.StatusInternalServerError)
+			return
+		}
+
 		setCORSHeadersOn(w)
 		io.WriteString(w, string(asJson))
 	}
@@ -300,6 +327,18 @@ func main() {
 		log.Print(err)
 	}
 	log.Print("Done")
+}
+
+func addRoute(routes *sync.Map, route model.Route, routingTable *sync.Map) {
+	routes.Store(route.Id, route)
+	// Update routing table for effected metric
+	effectedRoutes, ok := routingTable.Load(route.FromMetric)
+	if ok {
+		updated := append(effectedRoutes.([]model.Route), route)
+		routingTable.Store(route.FromMetric, updated)
+	} else {
+		routingTable.Store(route.FromMetric, []model.Route{route})
+	}
 }
 
 func setCORSHeadersOn(w http.ResponseWriter) {

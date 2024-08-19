@@ -1,3 +1,4 @@
 {
-  "MqttUrl": "tcp://10.0.46.10:32183"
+  "MqttUrl": "tcp://10.0.46.10:32183",
+  "Bucket": "abbottroad-dashboard"
 }
