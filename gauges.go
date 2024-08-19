@@ -7,6 +7,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/gorilla/mux"
 	"github.com/tkanos/gonfig"
+	"github.com/tonytw1/gauges/messaging"
 	"github.com/tonytw1/gauges/model"
 	"github.com/tonytw1/gauges/persistence"
 	"github.com/tonytw1/gauges/transforms"
@@ -16,10 +17,8 @@ import (
 	"net/http"
 	"os"
 	"sort"
-	"strconv"
 	"strings"
 	"sync"
-	"time"
 )
 
 import (
@@ -59,72 +58,11 @@ func main() {
 	gaugesTopic := "gauges"
 	metricsTopic := "metrics"
 
-	var metrics = sync.Map{}
-	metricsMessageHandler := func(client mqtt.Client, message mqtt.Message) {
-		payload := strings.TrimSpace(string(message.Payload()))
-		//log.Print("Received: " + payload + " on " + message.Topic())
+	gauges := sync.Map{}
+	metrics := sync.Map{}
 
-		topic := message.Topic()
-		payloadFields := strings.Split(payload, ":")
-		if len(payloadFields) != 2 {
-			log.Print("Rejected malformed metrics message: '" + payload + "'")
-			return
-		}
-
-		subtopic := strings.TrimPrefix(topic, metricsTopic+"/")
-		name := subtopic + "/" + payloadFields[0]
-		value := payloadFields[1]
-		metric := model.Metric{Name: name, Value: value}
-		metrics.Store(name, metric)
-
-		// Route metrics
-		routes, ok := routingTable.Load(metric.Name)
-		if ok {
-			routes := routes.([]model.Route)
-			if ok {
-				for _, route := range routes {
-					log.Print("Routing " + metric.Name + " to " + route.ToGauge)
-					transform, ok := transforms.GetTransformByName(route.Transform)
-					if ok {
-						transformedValue, err := transform.Transform(value)
-						if err != nil {
-							log.Print("Transform error: " + err.Error())
-							return
-						}
-						gaugesMessage := route.ToGauge + ":" + strconv.Itoa(transformedValue)
-						log.Print("Sending gauge message: " + gaugesMessage)
-						publish(client, gaugesTopic+"/signals", gaugesMessage)
-
-					} else {
-						log.Print("Unknown transform: " + route.Transform)
-					}
-				}
-			}
-		}
-	}
-
-	var gauges = sync.Map{}
-	gaugesMessageHandler := func(client mqtt.Client, message mqtt.Message) {
-		payload := strings.TrimSpace(string(message.Payload()))
-
-		split := strings.Split(payload, ":")
-		if len(split) != 2 {
-			log.Print("Rejected malformed gauges message: '" + payload + "'")
-			return
-		}
-		description := split[1]
-		fields := strings.Split(description, "[")
-		if len(fields) != 2 {
-			log.Print("Rejected malformed gauges message: '" + payload + "'")
-			return
-		}
-
-		name := fields[0]
-		value := strings.TrimSuffix(fields[1], "]")
-
-		gauge := model.Gauge{Name: name, MaxValue: value}
-		gauges.Store(name, gauge)
-	}
+	gaugesMessageHandler := messaging.GaugesMessageHandler(&gauges)
+	metricsMessageHandler := messaging.MetricsMessageHandler(&metrics, &routingTable, gaugesTopic, metricsTopic)
 
 	log.Print("Connecting to MQTT")
 	mqttClient := setupMqttClient(configuration.MqttUrl, "gauges-ui-"+uuid.New().String(),
@@ -378,9 +316,4 @@ func setupMqttClient(mqttURL string, clientId string, metricsTopic string, metri
 		panic(token.Error())
 	}
 	return client
-}
-
-func publish(c mqtt.Client, topic string, message string) {
-	token := c.Publish(topic, 0, false, message)
-	token.WaitTimeout(time.Second * 1)
 }
