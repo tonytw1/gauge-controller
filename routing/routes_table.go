@@ -14,7 +14,7 @@ func NewRoutesTable() RoutesTable {
 	return RoutesTable{routes: sync.Map{}, routingTable: sync.Map{}}
 }
 
-func (svc RoutesTable) AddRoute(route model.Route) {
+func (svc *RoutesTable) AddRoute(route model.Route) {
 	svc.routes.Store(route.Id, route)
 	// Update routing table for effected metric
 	effectedRoutes, ok := svc.routingTable.Load(route.FromMetric)
