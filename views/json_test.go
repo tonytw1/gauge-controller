@@ -1,13 +1,13 @@
 package views
 
 import (
+	"github.com/tonytw1/gauges/model"
 	"strings"
-	"sync"
 	"testing"
 )
 
 func TestRoutesAsJson_CanHandleEmptyRoutes(t *testing.T) {
-	var routes = sync.Map{}
+	var routes = []model.Route{}
 
 	asJson := RoutesAsJson(routes)
 
