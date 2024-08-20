@@ -57,7 +57,7 @@ func MetricsMessageHandler(metrics *sync.Map, routingTable *routing.RoutesTable,
 		metrics.Store(name, metric)
 
 		// Route metrics
-		routes, ok := routingTable.RoutingTable.Load(metric.Name)
+		routes, ok := routingTable.GetRoutesForMetric(metric.Name)
 		if ok {
 			routes := routes.([]model.Route)
 			if ok {

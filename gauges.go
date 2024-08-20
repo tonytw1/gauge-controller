@@ -45,7 +45,7 @@ func main() {
 	s3Client := s3.NewFromConfig(cfg)
 	routePersistence := persistence.S3RoutePersistence{S3Client: s3Client, Bucket: configuration.Bucket, Key: "routes.json"}
 
-	routesTable := routing.RoutesTable{Routes: sync.Map{}, RoutingTable: sync.Map{}}
+	routesTable := routing.NewRoutesTable()
 	// Reload persisted routes
 	persistedRoutes := routePersistence.LoadPersistedRoutes()
 	for _, route := range persistedRoutes {
@@ -98,7 +98,7 @@ func main() {
 	}
 
 	getRoutes := func(w http.ResponseWriter, r *http.Request) {
-		asJson := views.RoutesAsJson(routesTable.Routes)
+		asJson := views.RoutesAsJson(routesTable.AllRoutes())
 
 		setCORSHeadersOn(w)
 		io.WriteString(w, string(asJson))
@@ -107,7 +107,7 @@ func main() {
 	getRoute := func(w http.ResponseWriter, r *http.Request) {
 		vars := mux.Vars(r)
 		id := vars["id"] // TODO null check
-		route, ok := routesTable.Routes.Load(id)
+		route, ok := routesTable.GetRoute(id)
 		if !ok {
 			http.Error(w, "Not found", http.StatusNotFound)
 			return
@@ -130,32 +130,18 @@ func main() {
 	deleteRoute := func(w http.ResponseWriter, r *http.Request) {
 		vars := mux.Vars(r)
 		id := vars["id"] // TODO null check
-		route, ok := routesTable.Routes.Load(id)
+		route, ok := routesTable.GetRoute(id)
 		if !ok {
 			http.Error(w, "Not found", http.StatusNotFound)
 			return
 		}
-
 		if err != nil {
 			http.Error(w, "Error", http.StatusInternalServerError)
 		}
 
-		routesTable.Routes.Delete(route.(model.Route).Id)
-		// Update routing table for effected metric
-		effectedMetric := route.(model.Route).FromMetric
-		effectedMetricRoutes, ok := routesTable.Routes.Load(effectedMetric)
-		if ok {
-			// Filter out the route that was deleted
-			filtered := make([]model.Route, 0)
-			for _, route := range effectedMetricRoutes.([]model.Route) {
-				if route.Id != id {
-					filtered = append(filtered, route)
-				}
-			}
-			routesTable.RoutingTable.Store(effectedMetric, filtered)
-		}
+		routesTable.Delete(route)
 
-		asJson := views.RoutesAsJson(routesTable.Routes)
+		asJson := views.RoutesAsJson(routesTable.AllRoutes())
 
 		_, err = routePersistence.PersistRoutes(asJson)
 		if err != nil {
@@ -212,7 +198,7 @@ func main() {
 		}
 		routesTable.AddRoute(route)
 
-		asJson := views.RoutesAsJson(routesTable.Routes)
+		asJson := views.RoutesAsJson(routesTable.AllRoutes())
 
 		_, err = routePersistence.PersistRoutes(asJson)
 		if err != nil {
