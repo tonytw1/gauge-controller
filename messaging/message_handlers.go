@@ -3,6 +3,7 @@ package messaging
 import (
 	mqtt "github.com/eclipse/paho.mqtt.golang"
 	"github.com/tonytw1/gauges/model"
+	"github.com/tonytw1/gauges/routing"
 	"github.com/tonytw1/gauges/transforms"
 	"log"
 	"strconv"
@@ -37,7 +38,7 @@ func GaugesMessageHandler(gauges *sync.Map) func(mqtt.Client, mqtt.Message) {
 	return gaugesMessageHandler
 }
 
-func MetricsMessageHandler(metrics *sync.Map, routingTable *sync.Map, gaugesTopic string, metricsTopic string) func(mqtt.Client, mqtt.Message) {
+func MetricsMessageHandler(metrics *sync.Map, routingTable *routing.RoutesTable, gaugesTopic string, metricsTopic string) func(mqtt.Client, mqtt.Message) {
 	metricsMessageHandler := func(client mqtt.Client, message mqtt.Message) {
 		payload := strings.TrimSpace(string(message.Payload()))
 		//log.Print("Received: " + payload + " on " + message.Topic())
@@ -56,7 +57,7 @@ func MetricsMessageHandler(metrics *sync.Map, routingTable *sync.Map, gaugesTopi
 		metrics.Store(name, metric)
 
 		// Route metrics
-		routes, ok := routingTable.Load(metric.Name)
+		routes, ok := routingTable.RoutingTable.Load(metric.Name)
 		if ok {
 			routes := routes.([]model.Route)
 			if ok {

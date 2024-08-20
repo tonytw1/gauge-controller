@@ -9,6 +9,7 @@ import (
 	"github.com/tonytw1/gauges/messaging"
 	"github.com/tonytw1/gauges/model"
 	"github.com/tonytw1/gauges/persistence"
+	"github.com/tonytw1/gauges/routing"
 	"github.com/tonytw1/gauges/transforms"
 	"github.com/tonytw1/gauges/views"
 	"io"
@@ -44,13 +45,11 @@ func main() {
 	s3Client := s3.NewFromConfig(cfg)
 	routePersistence := persistence.S3RoutePersistence{S3Client: s3Client, Bucket: configuration.Bucket, Key: "routes.json"}
 
-	var routes = sync.Map{}
-	var routingTable = sync.Map{}
-
+	routesTable := routing.RoutesTable{Routes: sync.Map{}, RoutingTable: sync.Map{}}
 	// Reload persisted routes
 	persistedRoutes := routePersistence.LoadPersistedRoutes()
 	for _, route := range persistedRoutes {
-		addRoute(&routes, route, &routingTable)
+		routesTable.AddRoute(route)
 	}
 
 	gaugesTopic := "gauges"
@@ -60,7 +59,7 @@ func main() {
 	metrics := sync.Map{}
 
 	gaugesMessageHandler := messaging.GaugesMessageHandler(&gauges)
-	metricsMessageHandler := messaging.MetricsMessageHandler(&metrics, &routingTable, gaugesTopic, metricsTopic)
+	metricsMessageHandler := messaging.MetricsMessageHandler(&metrics, &routesTable, gaugesTopic, metricsTopic)
 
 	log.Print("Connecting to MQTT")
 	mqttClient := messaging.SetupMqttClient(configuration.MqttUrl, "gauges-ui-"+uuid.New().String(),
@@ -99,7 +98,7 @@ func main() {
 	}
 
 	getRoutes := func(w http.ResponseWriter, r *http.Request) {
-		asJson := views.RoutesAsJson(routes)
+		asJson := views.RoutesAsJson(routesTable.Routes)
 
 		setCORSHeadersOn(w)
 		io.WriteString(w, string(asJson))
@@ -108,7 +107,7 @@ func main() {
 	getRoute := func(w http.ResponseWriter, r *http.Request) {
 		vars := mux.Vars(r)
 		id := vars["id"] // TODO null check
-		route, ok := routes.Load(id)
+		route, ok := routesTable.Routes.Load(id)
 		if !ok {
 			http.Error(w, "Not found", http.StatusNotFound)
 			return
@@ -131,7 +130,7 @@ func main() {
 	deleteRoute := func(w http.ResponseWriter, r *http.Request) {
 		vars := mux.Vars(r)
 		id := vars["id"] // TODO null check
-		route, ok := routes.Load(id)
+		route, ok := routesTable.Routes.Load(id)
 		if !ok {
 			http.Error(w, "Not found", http.StatusNotFound)
 			return
@@ -141,10 +140,10 @@ func main() {
 			http.Error(w, "Error", http.StatusInternalServerError)
 		}
 
-		routes.Delete(route.(model.Route).Id)
+		routesTable.Routes.Delete(route.(model.Route).Id)
 		// Update routing table for effected metric
 		effectedMetric := route.(model.Route).FromMetric
-		effectedMetricRoutes, ok := routingTable.Load(effectedMetric)
+		effectedMetricRoutes, ok := routesTable.Routes.Load(effectedMetric)
 		if ok {
 			// Filter out the route that was deleted
 			filtered := make([]model.Route, 0)
@@ -153,10 +152,10 @@ func main() {
 					filtered = append(filtered, route)
 				}
 			}
-			routingTable.Store(effectedMetric, filtered)
+			routesTable.RoutingTable.Store(effectedMetric, filtered)
 		}
 
-		asJson := views.RoutesAsJson(routes)
+		asJson := views.RoutesAsJson(routesTable.Routes)
 
 		_, err = routePersistence.PersistRoutes(asJson)
 		if err != nil {
@@ -211,9 +210,9 @@ func main() {
 			ToGauge:    gauge.(model.Gauge).Name,
 			Transform:  transform.Name,
 		}
-		addRoute(&routes, route, &routingTable)
+		routesTable.AddRoute(route)
 
-		asJson := views.RoutesAsJson(routes)
+		asJson := views.RoutesAsJson(routesTable.Routes)
 
 		_, err = routePersistence.PersistRoutes(asJson)
 		if err != nil {
@@ -262,18 +261,6 @@ func main() {
 		log.Print(err)
 	}
 	log.Print("Done")
-}
-
-func addRoute(routes *sync.Map, route model.Route, routingTable *sync.Map) {
-	routes.Store(route.Id, route)
-	// Update routing table for effected metric
-	effectedRoutes, ok := routingTable.Load(route.FromMetric)
-	if ok {
-		updated := append(effectedRoutes.([]model.Route), route)
-		routingTable.Store(route.FromMetric, updated)
-	} else {
-		routingTable.Store(route.FromMetric, []model.Route{route})
-	}
 }
 
 func setCORSHeadersOn(w http.ResponseWriter) {
