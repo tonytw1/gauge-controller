@@ -55,10 +55,11 @@ func main() {
 	gaugesTopic := "gauges"
 	metricsTopic := "metrics"
 
-	gauges := sync.Map{}
 	metrics := sync.Map{}
 
-	gaugesMessageHandler := messaging.GaugesMessageHandler(&gauges)
+	gaugesTable := routing.NewGaugesTable()
+
+	gaugesMessageHandler := messaging.GaugesMessageHandler(&gaugesTable)
 	metricsMessageHandler := messaging.MetricsMessageHandler(&metrics, &routesTable, gaugesTopic, metricsTopic)
 
 	log.Print("Connecting to MQTT")
@@ -68,11 +69,7 @@ func main() {
 	defer mqttClient.Disconnect(250)
 
 	getGauges := func(w http.ResponseWriter, r *http.Request) {
-		var gs = make([]model.Gauge, 0)
-		gauges.Range(func(k, v interface{}) bool {
-			gs = append(gs, v.(model.Gauge))
-			return true
-		})
+		var gs = gaugesTable.AllGauges()
 		sort.Slice(gs, func(i, j int) bool {
 			return strings.Compare(gs[i].Name, gs[j].Name) < 0
 		})
@@ -183,7 +180,7 @@ func main() {
 			http.Error(w, "Invalid transform name", http.StatusBadRequest)
 			return
 		}
-		gauge, ok := gauges.Load(rr.Gauge)
+		gauge, ok := gaugesTable.GetGauge(rr.Gauge)
 		if !ok {
 			http.Error(w, "Invalid gauge name", http.StatusBadRequest)
 			return

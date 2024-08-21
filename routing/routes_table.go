@@ -61,6 +61,6 @@ func (svc *RoutesTable) Delete(route *model.Route) {
 	}
 }
 
-func (svc RoutesTable) GetRoutesForMetric(metricName string) (any, bool) {
+func (svc *RoutesTable) GetRoutesForMetric(metricName string) (any, bool) {
 	return svc.routingTable.Load(metricName) // TODO pull any down
 }

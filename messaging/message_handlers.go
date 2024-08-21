@@ -12,7 +12,7 @@ import (
 	"time"
 )
 
-func GaugesMessageHandler(gauges *sync.Map) func(mqtt.Client, mqtt.Message) {
+func GaugesMessageHandler(gaugesTable *routing.GaugesTable) func(mqtt.Client, mqtt.Message) {
 	gaugesMessageHandler := func(client mqtt.Client, message mqtt.Message) {
 		payload := strings.TrimSpace(string(message.Payload()))
 
@@ -32,7 +32,7 @@ func GaugesMessageHandler(gauges *sync.Map) func(mqtt.Client, mqtt.Message) {
 		value := strings.TrimSuffix(fields[1], "]")
 
 		gauge := model.Gauge{Name: name, MaxValue: value}
-		gauges.Store(name, gauge)
+		gaugesTable.AddGauge(gauge)
 	}
 
 	return gaugesMessageHandler
