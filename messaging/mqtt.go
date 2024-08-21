@@ -3,12 +3,13 @@ package messaging
 import (
 	mqtt "github.com/eclipse/paho.mqtt.golang"
 	"github.com/google/uuid"
+	"github.com/tonytw1/gauges/routing"
 	"log"
 	"os"
 )
 
 func SetupMqttClient(mqttURL string, metricsTopic string, metricsHandler mqtt.MessageHandler,
-	gaugesAnnouncementsTopic string, gaugesHandler mqtt.MessageHandler) mqtt.Client {
+	gaugesAnnouncementsTopic string, gaugesTable *routing.GaugesTable) mqtt.Client {
 
 	mqtt.ERROR = log.New(os.Stdout, "[ERROR] ", 0)
 	mqtt.CRITICAL = log.New(os.Stdout, "[CRIT] ", 0)
@@ -19,7 +20,7 @@ func SetupMqttClient(mqttURL string, metricsTopic string, metricsHandler mqtt.Me
 		log.Print("Subscribing to " + metricsTopic)
 		client.Subscribe(metricsTopic, 0, metricsHandler)
 		log.Print("Subscribing to " + gaugesAnnouncementsTopic)
-		client.Subscribe(gaugesAnnouncementsTopic, 0, gaugesHandler)
+		client.Subscribe(gaugesAnnouncementsTopic, 0, GaugesMessageHandler(gaugesTable))
 	}
 	var logConnectionLost mqtt.ConnectionLostHandler = func(client mqtt.Client, err error) {
 		log.Print("Connection lost")
