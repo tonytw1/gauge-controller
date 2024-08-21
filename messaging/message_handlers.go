@@ -8,7 +8,6 @@ import (
 	"log"
 	"strconv"
 	"strings"
-	"sync"
 	"time"
 )
 
@@ -38,7 +37,7 @@ func GaugesMessageHandler(gaugesTable *routing.GaugesTable) func(mqtt.Client, mq
 	return gaugesMessageHandler
 }
 
-func MetricsMessageHandler(metrics *sync.Map, routingTable *routing.RoutesTable, gaugesTopic string, metricsTopic string) func(mqtt.Client, mqtt.Message) {
+func MetricsMessageHandler(metricsTable *routing.MetricsTable, routingTable *routing.RoutesTable, gaugesTopic string, metricsTopic string) func(mqtt.Client, mqtt.Message) {
 	metricsMessageHandler := func(client mqtt.Client, message mqtt.Message) {
 		payload := strings.TrimSpace(string(message.Payload()))
 		//log.Print("Received: " + payload + " on " + message.Topic())
@@ -54,7 +53,7 @@ func MetricsMessageHandler(metrics *sync.Map, routingTable *routing.RoutesTable,
 		name := subtopic + "/" + payloadFields[0]
 		value := payloadFields[1]
 		metric := model.Metric{Name: name, Value: value}
-		metrics.Store(name, metric)
+		metricsTable.AddMetrics(metric)
 
 		// Route metrics
 		routes, ok := routingTable.GetRoutesForMetric(metric.Name)

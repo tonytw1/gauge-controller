@@ -16,7 +16,6 @@ import (
 	"net/http"
 	"sort"
 	"strings"
-	"sync"
 )
 
 func main() {
@@ -44,8 +43,8 @@ func main() {
 	gaugesTopic := "gauges"
 	metricsTopic := "metrics"
 
-	metrics := sync.Map{}
-	metricsMessageHandler := messaging.MetricsMessageHandler(&metrics, &routesTable, gaugesTopic, metricsTopic)
+	metricsTable := routing.NewMetricsTable()
+	metricsMessageHandler := messaging.MetricsMessageHandler(&metricsTable, &routesTable, gaugesTopic, metricsTopic)
 
 	log.Print("Connecting to MQTT")
 	mqttClient := messaging.SetupMqttClient(configuration.MqttUrl,
@@ -65,11 +64,7 @@ func main() {
 	}
 
 	getMetrics := func(w http.ResponseWriter, r *http.Request) {
-		var ms = make([]model.Metric, 0)
-		metrics.Range(func(k, v interface{}) bool {
-			ms = append(ms, v.(model.Metric))
-			return true
-		})
+		ms := metricsTable.AllMetrics()
 		sort.Slice(ms, func(i, j int) bool {
 			return strings.Compare(ms[i].Name, ms[j].Name) < 0
 		})
@@ -155,7 +150,7 @@ func main() {
 			panic(err)
 		}
 
-		metric, ok := metrics.Load(rr.Metric)
+		metric, ok := metricsTable.GetMetric(rr.Metric)
 		if !ok {
 			http.Error(w, "Invalid metric name", http.StatusBadRequest)
 			return
