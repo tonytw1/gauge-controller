@@ -2,12 +2,14 @@ package messaging
 
 import (
 	mqtt "github.com/eclipse/paho.mqtt.golang"
+	"github.com/google/uuid"
 	"log"
 	"os"
 )
 
-func SetupMqttClient(mqttURL string, clientId string, metricsTopic string, metricsHandler mqtt.MessageHandler,
+func SetupMqttClient(mqttURL string, metricsTopic string, metricsHandler mqtt.MessageHandler,
 	gaugesAnnouncementsTopic string, gaugesHandler mqtt.MessageHandler) mqtt.Client {
+
 	mqtt.ERROR = log.New(os.Stdout, "[ERROR] ", 0)
 	mqtt.CRITICAL = log.New(os.Stdout, "[CRIT] ", 0)
 	mqtt.WARN = log.New(os.Stdout, "[WARN]  ", 0)
@@ -26,6 +28,7 @@ func SetupMqttClient(mqttURL string, clientId string, metricsTopic string, metri
 		log.Print("Reconnecting")
 	}
 
+	clientId := "gauges-ui-" + uuid.New().String()
 	opts := mqtt.NewClientOptions().AddBroker(mqttURL)
 	opts.SetClientID(clientId)
 	opts.SetOnConnectHandler(subscribeToTopics)

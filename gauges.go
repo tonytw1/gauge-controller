@@ -62,7 +62,7 @@ func main() {
 	metricsMessageHandler := messaging.MetricsMessageHandler(&metrics, &routesTable, gaugesTopic, metricsTopic)
 
 	log.Print("Connecting to MQTT")
-	mqttClient := messaging.SetupMqttClient(configuration.MqttUrl, "gauges-ui-"+uuid.New().String(),
+	mqttClient := messaging.SetupMqttClient(configuration.MqttUrl,
 		metricsTopic+"/#", metricsMessageHandler,
 		gaugesTopic+"/announcements", gaugesMessageHandler)
 	defer mqttClient.Disconnect(250)
