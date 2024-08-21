@@ -2,7 +2,6 @@ package main
 
 import (
 	"encoding/json"
-	"github.com/aws/aws-sdk-go-v2/service/s3"
 	"github.com/google/uuid"
 	"github.com/gorilla/mux"
 	"github.com/tkanos/gonfig"
@@ -20,11 +19,6 @@ import (
 	"sync"
 )
 
-import (
-	"context"
-	"github.com/aws/aws-sdk-go-v2/config"
-)
-
 func main() {
 	type Configuration struct {
 		MqttUrl string
@@ -36,16 +30,11 @@ func main() {
 		panic(err)
 	}
 
-	// Setup S3 client
-	region := "eu-west-2"
-	cfg, err := config.LoadDefaultConfig(context.TODO(), config.WithRegion(region))
-	if err != nil {
-		log.Fatal(err)
-	}
-	s3Client := s3.NewFromConfig(cfg)
-	routePersistence := persistence.S3RoutePersistence{S3Client: s3Client, Bucket: configuration.Bucket, Key: "routes.json"}
+	routePersistence := persistence.NewS3RoutePersistence(configuration.Bucket, "routes.json")
 
 	routesTable := routing.NewRoutesTable()
+	gaugesTable := routing.NewGaugesTable()
+
 	// Reload persisted routes
 	persistedRoutes := routePersistence.LoadPersistedRoutes()
 	for _, route := range persistedRoutes {
@@ -57,8 +46,6 @@ func main() {
 
 	metrics := sync.Map{}
 	metricsMessageHandler := messaging.MetricsMessageHandler(&metrics, &routesTable, gaugesTopic, metricsTopic)
-
-	gaugesTable := routing.NewGaugesTable()
 
 	log.Print("Connecting to MQTT")
 	mqttClient := messaging.SetupMqttClient(configuration.MqttUrl,
