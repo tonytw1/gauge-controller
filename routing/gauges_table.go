@@ -13,7 +13,7 @@ func NewGaugesTable() GaugesTable {
 	return GaugesTable{gauges: sync.Map{}}
 }
 
-func (svc GaugesTable) AddGauge(gauge model.Gauge) {
+func (svc *GaugesTable) AddGauge(gauge model.Gauge) {
 	svc.gauges.Store(gauge.Name, gauge)
 }
 
@@ -26,6 +26,6 @@ func (svc *GaugesTable) AllGauges() []model.Gauge {
 	return gs
 }
 
-func (svc GaugesTable) GetGauge(gaugeName string) (any, bool) {
+func (svc *GaugesTable) GetGauge(gaugeName string) (any, bool) {
 	return svc.gauges.Load(gaugeName) // TODO push any up
 }
