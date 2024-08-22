@@ -33,6 +33,7 @@ func main() {
 
 	routesTable := routing.NewRoutesTable()
 	gaugesTable := routing.NewGaugesTable()
+	metricsTable := routing.NewMetricsTable()
 
 	// Reload persisted routes
 	persistedRoutes := routePersistence.LoadPersistedRoutes()
@@ -43,13 +44,11 @@ func main() {
 	gaugesTopic := "gauges"
 	metricsTopic := "metrics"
 
-	metricsTable := routing.NewMetricsTable()
-	metricsMessageHandler := messaging.MetricsMessageHandler(&metricsTable, &routesTable, gaugesTopic, metricsTopic)
-
 	log.Print("Connecting to MQTT")
 	mqttClient := messaging.SetupMqttClient(configuration.MqttUrl,
-		metricsTopic+"/#", metricsMessageHandler,
-		gaugesTopic+"/announcements", &gaugesTable)
+		metricsTopic+"/#",
+		gaugesTopic+"/announcements",
+		&gaugesTable, &metricsTable, &routesTable, gaugesTopic)
 	defer mqttClient.Disconnect(250)
 
 	getGauges := func(w http.ResponseWriter, r *http.Request) {

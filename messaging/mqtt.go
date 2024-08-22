@@ -8,8 +8,8 @@ import (
 	"os"
 )
 
-func SetupMqttClient(mqttURL string, metricsTopic string, metricsHandler mqtt.MessageHandler,
-	gaugesAnnouncementsTopic string, gaugesTable *routing.GaugesTable) mqtt.Client {
+func SetupMqttClient(mqttURL string, metricsTopic string, gaugesAnnouncementsTopic string, gaugesTable *routing.GaugesTable,
+	metricsTable *routing.MetricsTable, routesTable *routing.RoutesTable, gaugesTopic string) mqtt.Client {
 
 	mqtt.ERROR = log.New(os.Stdout, "[ERROR] ", 0)
 	mqtt.CRITICAL = log.New(os.Stdout, "[CRIT] ", 0)
@@ -17,10 +17,10 @@ func SetupMqttClient(mqttURL string, metricsTopic string, metricsHandler mqtt.Me
 
 	var subscribeToTopics mqtt.OnConnectHandler = func(client mqtt.Client) {
 		log.Print("Connected to " + mqttURL)
-		log.Print("Subscribing to " + metricsTopic)
-		client.Subscribe(metricsTopic, 0, metricsHandler)
 		log.Print("Subscribing to " + gaugesAnnouncementsTopic)
 		client.Subscribe(gaugesAnnouncementsTopic, 0, GaugesMessageHandler(gaugesTable))
+		log.Print("Subscribing to " + metricsTopic)
+		client.Subscribe(metricsTopic, 0, MetricsMessageHandler(metricsTable, routesTable, gaugesTopic, metricsTopic))
 	}
 	var logConnectionLost mqtt.ConnectionLostHandler = func(client mqtt.Client, err error) {
 		log.Print("Connection lost")
