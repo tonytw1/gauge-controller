@@ -46,9 +46,9 @@ func main() {
 
 	log.Print("Connecting to MQTT")
 	mqttClient := messaging.SetupMqttClient(configuration.MqttUrl,
-		metricsTopic+"/#",
-		gaugesTopic+"/announcements",
-		&gaugesTable, &metricsTable, &routesTable, gaugesTopic)
+		metricsTopic,
+		gaugesTopic,
+		&gaugesTable, &metricsTable, &routesTable)
 	defer mqttClient.Disconnect(250)
 
 	getGauges := func(w http.ResponseWriter, r *http.Request) {
