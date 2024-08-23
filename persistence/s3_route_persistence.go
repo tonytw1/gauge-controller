@@ -11,6 +11,7 @@ import (
 	"log"
 	"strconv"
 	"strings"
+	"sync"
 )
 
 type RoutePersistence interface {
@@ -22,6 +23,7 @@ type S3RoutePersistence struct {
 	s3Client *s3.Client
 	bucket   string
 	key      string
+	mu       sync.Mutex
 }
 
 func NewS3RoutePersistence(bucket string, key string) RoutePersistence {
@@ -36,6 +38,9 @@ func NewS3RoutePersistence(bucket string, key string) RoutePersistence {
 
 func (svc S3RoutePersistence) PersistRoutes(asJson []byte) (*s3.PutObjectOutput, error) {
 	log.Print("Persisting routes to bucket: '" + svc.bucket + "'" + " key: '" + svc.key + "'")
+	svc.mu.Lock()
+	defer svc.mu.Unlock()
+
 	body := string(asJson)
 	log.Print("Persisting: " + body)
 	output, err := svc.s3Client.PutObject(context.TODO(), &s3.PutObjectInput{
