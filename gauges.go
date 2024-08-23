@@ -105,16 +105,17 @@ func main() {
 
 	deleteRoute := func(w http.ResponseWriter, r *http.Request) {
 		vars := mux.Vars(r)
-		id := vars["id"] // TODO null check
+		id := vars["id"]
+		if id == "" {
+			http.Error(w, "Not found", http.StatusBadRequest)
+			return
+		}
+
 		route, ok := routesTable.GetRoute(id)
 		if !ok {
 			http.Error(w, "Not found", http.StatusNotFound)
 			return
 		}
-		if err != nil {
-			http.Error(w, "Error", http.StatusInternalServerError)
-		}
-
 		routesTable.Delete(route)
 
 		asJson := views.RoutesAsJson(routesTable.AllRoutes())
