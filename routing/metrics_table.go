@@ -22,8 +22,13 @@ func (svc *MetricsTable) AllMetrics() []model.Metric {
 	return ms
 }
 
-func (svc *MetricsTable) GetMetric(metricName string) (any, bool) {
-	return svc.metrics.Load(metricName) // TODO push any up
+func (svc *MetricsTable) GetMetric(metricName string) (*model.Metric, bool) {
+	value, ok := svc.metrics.Load(metricName)
+	if ok {
+		metric := value.(model.Metric)
+		return &metric, ok
+	}
+	return nil, ok
 }
 
 func NewMetricsTable() MetricsTable {

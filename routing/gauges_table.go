@@ -26,6 +26,11 @@ func (svc *GaugesTable) AllGauges() []model.Gauge {
 	return gs
 }
 
-func (svc *GaugesTable) GetGauge(gaugeName string) (any, bool) {
-	return svc.gauges.Load(gaugeName) // TODO push any up
+func (svc *GaugesTable) GetGauge(gaugeName string) (*model.Gauge, bool) {
+	value, ok := svc.gauges.Load(gaugeName)
+	if ok {
+		gauge := value.(model.Gauge)
+		return &gauge, ok
+	}
+	return nil, ok
 }

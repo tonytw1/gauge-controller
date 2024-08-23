@@ -58,24 +58,21 @@ func MetricsMessageHandler(metricsTable *routing.MetricsTable, routingTable *rou
 		// Route metrics
 		routes, ok := routingTable.GetRoutesForMetric(metric.Name)
 		if ok {
-			routes := routes.([]model.Route)
-			if ok {
-				for _, route := range routes {
-					log.Print("Routing " + metric.Name + " to " + route.ToGauge)
-					transform, ok := transforms.GetTransformByName(route.Transform)
-					if ok {
-						transformedValue, err := transform.Transform(value)
-						if err != nil {
-							log.Print("Transform error: " + err.Error())
-							return
-						}
-						gaugesMessage := route.ToGauge + ":" + strconv.Itoa(transformedValue)
-						log.Print("Sending gauge message: " + gaugesMessage)
-						publish(client, gaugesTopic+"/signals", gaugesMessage)
-
-					} else {
-						log.Print("Unknown transform: " + route.Transform)
+			for _, route := range routes {
+				log.Print("Routing " + metric.Name + " to " + route.ToGauge)
+				transform, ok := transforms.GetTransformByName(route.Transform)
+				if ok {
+					transformedValue, err := transform.Transform(value)
+					if err != nil {
+						log.Print("Transform error: " + err.Error())
+						return
 					}
+					gaugesMessage := route.ToGauge + ":" + strconv.Itoa(transformedValue)
+					log.Print("Sending gauge message: " + gaugesMessage)
+					publish(client, gaugesTopic+"/signals", gaugesMessage)
+
+				} else {
+					log.Print("Unknown transform: " + route.Transform)
 				}
 			}
 		}

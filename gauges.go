@@ -169,8 +169,8 @@ func main() {
 		id := uuid.New().String()
 		route := model.Route{
 			Id:         id,
-			FromMetric: metric.(model.Metric).Name,
-			ToGauge:    gauge.(model.Gauge).Name,
+			FromMetric: metric.Name,
+			ToGauge:    gauge.Name,
 			Transform:  transform.Name,
 		}
 		routesTable.AddRoute(route)
